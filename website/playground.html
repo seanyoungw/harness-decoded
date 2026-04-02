@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Playground — harness-decoded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f;--bg2:#11111a;--bg3:#1a1a28;--bg4:#22223a;
+    --border:rgba(120,120,200,0.12);--border2:rgba(120,120,200,0.28);
+    --text:#e2e2f0;--muted:#7070a0;
+    --purple:#8b5cf6;--purple2:#a78bfa;
+    --teal:#2dd4bf;--amber:#f59e0b;--coral:#f97316;--green:#34d399;--blue:#60a5fa;
+    --font-mono:'JetBrains Mono',monospace;--font-head:'Syne',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:14px;line-height:1.6;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:rgba(10,10,15,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;}
+  .nav-logo{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--text);text-decoration:none;}
+  .nav-logo span{color:var(--purple);}
+  .nav-back{color:var(--muted);text-decoration:none;font-size:12px;}
+  .nav-back:hover{color:var(--purple2);}
+  .nav-title{font-size:12px;color:var(--muted);letter-spacing:0.1em;}
+
+  .workspace{display:grid;grid-template-columns:220px 1fr 340px;flex:1;overflow:hidden;}
+
+  /* ── SIDEBAR: Component Palette ── */
+  .palette{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:1rem;}
+  .palette-title{font-size:10px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-bottom:.75rem;padding-left:.25rem;}
+  .palette-group{margin-bottom:1.5rem;}
+  .palette-group-label{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:.5rem;padding:.25rem .5rem;border-radius:4px;background:rgba(255,255,255,0.03);}
+  .comp-chip{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:6px;border:1px solid var(--border);background:var(--bg3);margin-bottom:4px;cursor:grab;font-size:12px;transition:all .15s;user-select:none;}
+  .comp-chip:hover{border-color:var(--border2);background:var(--bg4);}
+  .comp-chip:active{cursor:grabbing;}
+  .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+  /* ── CANVAS ── */
+  .canvas-area{position:relative;overflow:hidden;background:var(--bg);background-image:radial-gradient(circle,rgba(120,120,200,0.06) 1px,transparent 1px);background-size:24px 24px;}
+  .canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:.4;transition:opacity .3s;}
+  .canvas-hint.hidden{opacity:0;}
+  .hint-icon{font-size:2rem;margin-bottom:.5rem;}
+  .hint-text{font-size:12px;color:var(--muted);line-height:1.8;}
+
+  .placed-comp{position:absolute;min-width:160px;padding:.6rem 1rem;border-radius:8px;border:1px solid;background:var(--bg2);cursor:move;user-select:none;font-size:12px;transition:box-shadow .15s;}
+  .placed-comp:hover{box-shadow:0 0 0 1px currentColor;}
+  .placed-comp.selected{box-shadow:0 0 0 2px currentColor,0 0 12px rgba(139,92,246,0.2);}
+  .comp-name{font-weight:500;margin-bottom:2px;}
+  .comp-tag{font-size:10px;opacity:.6;}
+  .comp-delete{position:absolute;top:4px;right:6px;font-size:10px;opacity:0;cursor:pointer;color:var(--muted);}
+  .placed-comp:hover .comp-delete{opacity:1;}
+
+  /* ── CODE PANEL ── */
+  .code-panel{background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .code-header{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .code-tabs{display:flex;gap:2px;flex:1;}
+  .code-tab{padding:.3rem .75rem;border-radius:4px;font-size:11px;cursor:pointer;color:var(--muted);transition:all .15s;}
+  .code-tab.active{background:var(--bg3);color:var(--text);}
+  .copy-btn{padding:.3rem .75rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;transition:all .15s;}
+  .copy-btn:hover{border-color:var(--border2);color:var(--text);}
+  .code-body{flex:1;overflow-y:auto;padding:1rem;}
+  pre.gen{font-size:11px;line-height:1.8;color:var(--muted);white-space:pre-wrap;}
+  pre.gen .kw{color:var(--purple2);}
+  pre.gen .fn{color:var(--blue);}
+  pre.gen .str{color:var(--green);}
+  pre.gen .cm{color:#3a3a5a;font-style:italic;}
+  pre.gen .hl{color:var(--text);}
+
+  .empty-code{text-align:center;color:var(--muted);font-size:12px;padding:3rem 1rem;line-height:2;}
+
+  /* ── TOOLBAR ── */
+  .toolbar{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg2);}
+  .tb-btn{padding:.4rem .9rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;transition:all .15s;}
+  .tb-btn:hover{border-color:var(--border2);color:var(--text);}
+  .tb-btn.primary{background:var(--purple);border-color:var(--purple);color:#fff;}
+  .tb-btn.primary:hover{background:var(--purple2);}
+  .comp-count{font-size:11px;color:var(--muted);margin-left:auto;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">harness<span>-decoded</span></a>
+  <span class="nav-title">Architecture Playground</span>
+  <a href="index.html" class="nav-back">← back</a>
+</nav>
+
+<div class="workspace">
+
+  <!-- PALETTE -->
+  <div class="palette">
+    <p class="palette-title">Components</p>
+
+    <div class="palette-group">
+      <div class="palette-group-label">Core</div>
+      <div class="comp-chip" draggable="true" data-type="harness" data-color="#8b5cf6" data-label="Agent Harness" data-tag="orchestration loop">
+        <div class="chip-dot" style="background:#8b5cf6"></div>AgentHarness
+      </div>
+      <div class="comp-chip" draggable="true" data-type="query" data-color="#60a5fa" data-label="Query Engine" data-tag="LLM calls + retry">
+        <div class="chip-dot" style="background:#60a5fa"></div>QueryEngine
+      </div>
+      <div class="comp-chip" draggable="true" data-type="memory" data-color="#2dd4bf" data-label="Memory System" data-tag="autoCompact + KAIROS">
+        <div class="chip-dot" style="background:#2dd4bf"></div>MemorySystem
+      </div>
+    </div>
+
+    <div class="palette-group">
+      <div class="palette-group-label">Tools</div>
+      <div class="comp-chip" draggable="true" data-type="tool_read" data-color="#f59e0b" data-label="ReadFileTool" data-tag="FS_READ">
+        <div class="chip-dot" style="background:#f59e0b"></div>ReadFileTool
+      </div>
+      <div class="comp-chip" draggable="true" data-type="tool_write" data-color="#f59e0b" data-label="WriteFileTool" data-tag="FS_READ + FS_WRITE">
+        <div class="chip-dot" style="background:#f59e0b"></div>WriteFileTool
+      </div>
+      <div class="comp-chip" draggable="true" data-type="tool_bash" data-color="#f97316" data-label="BashTool" data-tag="SHELL_EXEC">
+        <div class="chip-dot" style="background:#f97316"></div>BashTool
+      </div>
+      <div class="comp-chip" draggable="true" data-type="tool_net" data-color="#f97316" data-label="WebFetchTool" data-tag="NET_FETCH">
+        <div class="chip-dot" style="background:#f97316"></div>WebFetchTool
+      </div>
+      <div class="comp-chip" draggable="true" data-type="tool_list" data-color="#f59e0b" data-label="ListDirectoryTool" data-tag="FS_READ">
+        <div class="chip-dot" style="background:#f59e0b"></div>ListDirectoryTool
+      </div>
+    </div>
+
+    <div class="palette-group">
+      <div class="palette-group-label">Orchestration</div>
+      <div class="comp-chip" draggable="true" data-type="fanout" data-color="#34d399" data-label="Parallel Fan-Out" data-tag="concurrent subagents">
+        <div class="chip-dot" style="background:#34d399"></div>ParallelFanOut
+      </div>
+      <div class="comp-chip" draggable="true" data-type="swarm" data-color="#34d399" data-label="Swarm Orchestrator" data-tag="dynamic spawning">
+        <div class="chip-dot" style="background:#34d399"></div>SwarmOrchestrator
+      </div>
+    </div>
+
+    <div class="palette-group">
+      <div class="palette-group-label">Infrastructure</div>
+      <div class="comp-chip" draggable="true" data-type="audit" data-color="#7070a0" data-label="AuditLog" data-tag="JSONL append-only">
+        <div class="chip-dot" style="background:#7070a0"></div>AuditLog
+      </div>
+      <div class="comp-chip" draggable="true" data-type="perms" data-color="#7070a0" data-label="PermissionSet" data-tag="access control">
+        <div class="chip-dot" style="background:#7070a0"></div>PermissionSet
+      </div>
+      <div class="comp-chip" draggable="true" data-type="kairos" data-color="#2dd4bf" data-label="KAIROS Daemon" data-tag="background consolidation">
+        <div class="chip-dot" style="background:#2dd4bf"></div>KAIROS
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area" id="canvas">
+    <div class="canvas-hint" id="hint">
+      <div class="hint-icon">⬡</div>
+      <div class="hint-text">Drag components from the left panel<br>to design your agent architecture</div>
+    </div>
+  </div>
+
+  <!-- CODE PANEL -->
+  <div class="code-panel">
+    <div class="code-header">
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchTab('python', this)">Python</div>
+        <div class="code-tab" onclick="switchTab('typescript', this)">TypeScript</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode()">copy</button>
+    </div>
+    <div class="code-body" id="code-body">
+      <div class="empty-code" id="empty-msg">
+        Add components to the canvas<br>to generate scaffolding code
+      </div>
+      <pre class="gen" id="gen-code" style="display:none"></pre>
+    </div>
+    <div class="toolbar">
+      <button class="tb-btn" onclick="clearCanvas()">clear</button>
+      <button class="tb-btn primary" onclick="generateCode()">⚡ generate</button>
+      <span class="comp-count" id="comp-count">0 components</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const hint = document.getElementById('hint');
+let placed = [];
+let currentLang = 'python';
+let dragOffset = {x:0, y:0};
+let draggingEl = null;
+let nextId = 1;
+
+// ── Drag from palette ──
+document.querySelectorAll('.comp-chip').forEach(chip => {
+  chip.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('new', JSON.stringify({
+      type: chip.dataset.type,
+      color: chip.dataset.color,
+      label: chip.dataset.label,
+      tag: chip.dataset.tag,
+    }));
+  });
+});
+
+canvas.addEventListener('dragover', e => { e.preventDefault(); });
+
+canvas.addEventListener('drop', e => {
+  e.preventDefault();
+  const raw = e.dataTransfer.getData('new');
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left - 80;
+  const y = e.clientY - rect.top - 20;
+  addComponent(data, x, y);
+});
+
+function addComponent(data, x, y) {
+  const id = nextId++;
+  const el = document.createElement('div');
+  el.className = 'placed-comp';
+  el.id = `comp-${id}`;
+  el.style.cssText = `left:${x}px;top:${y}px;border-color:${data.color};color:${data.color}`;
+  el.innerHTML = `<div class="comp-name" style="color:var(--text)">${data.label}</div><div class="comp-tag">${data.tag}</div><span class="comp-delete" onclick="removeComp(${id})">✕</span>`;
+
+  // Drag to move
+  el.addEventListener('mousedown', ev => {
+    if (ev.target.classList.contains('comp-delete')) return;
+    draggingEl = el;
+    const r = el.getBoundingClientRect();
+    dragOffset = {x: ev.clientX - r.left, y: ev.clientY - r.top};
+    el.classList.add('selected');
+    document.querySelectorAll('.placed-comp').forEach(c => { if(c !== el) c.classList.remove('selected'); });
+    ev.preventDefault();
+  });
+
+  canvas.appendChild(el);
+  placed.push({id, ...data, x, y});
+  updateHint();
+  generateCode();
+}
+
+document.addEventListener('mousemove', e => {
+  if (!draggingEl) return;
+  const r = canvas.getBoundingClientRect();
+  draggingEl.style.left = (e.clientX - r.left - dragOffset.x) + 'px';
+  draggingEl.style.top = (e.clientY - r.top - dragOffset.y) + 'px';
+});
+
+document.addEventListener('mouseup', () => { draggingEl = null; });
+
+function removeComp(id) {
+  placed = placed.filter(p => p.id !== id);
+  document.getElementById(`comp-${id}`)?.remove();
+  updateHint();
+  generateCode();
+}
+
+function clearCanvas() {
+  placed = [];
+  canvas.querySelectorAll('.placed-comp').forEach(el => el.remove());
+  updateHint();
+  generateCode();
+}
+
+function updateHint() {
+  hint.classList.toggle('hidden', placed.length > 0);
+  document.getElementById('comp-count').textContent = `${placed.length} component${placed.length !== 1 ? 's' : ''}`;
+}
+
+function switchTab(lang, tabEl) {
+  currentLang = lang;
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  generateCode();
+}
+
+function copyCode() {
+  const code = document.getElementById('gen-code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+// ── Code Generation ──
+function generateCode() {
+  const codeEl = document.getElementById('gen-code');
+  const emptyEl = document.getElementById('empty-msg');
+
+  if (placed.length === 0) {
+    codeEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  codeEl.style.display = 'block';
+
+  const types = placed.map(p => p.type);
+  const hasHarness = types.includes('harness');
+  const hasQuery = types.includes('query');
+  const hasMemory = types.includes('memory');
+  const hasAudit = types.includes('audit');
+  const hasKairos = types.includes('kairos');
+  const hasFanout = types.includes('fanout');
+  const hasSwarm = types.includes('swarm');
+  const tools = types.filter(t => t.startsWith('tool_'));
+  const hasPerms = types.includes('perms');
+  const hasBash = types.includes('tool_bash');
+  const hasNet = types.includes('tool_net');
+
+  if (currentLang === 'python') {
+    codeEl.innerHTML = generatePython({hasHarness,hasQuery,hasMemory,hasAudit,hasKairos,hasFanout,hasSwarm,tools,hasPerms,hasBash,hasNet});
+  } else {
+    codeEl.innerHTML = generateTypeScript({hasHarness,hasQuery,hasMemory,hasAudit,hasKairos,hasFanout,hasSwarm,tools,hasPerms,hasBash,hasNet});
+  }
+}
+
+function h(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function kw(s){return `<span class="kw">${s}</span>`;}
+function fn(s){return `<span class="fn">${s}</span>`;}
+function st(s){return `<span class="str">${s}</span>`;}
+function cm(s){return `<span class="cm">${s}</span>`;}
+function hl(s){return `<span class="hl">${s}</span>`;}
+
+function generatePython(f) {
+  const perms = [];
+  if (f.tools.includes('tool_read') || f.tools.includes('tool_list')) perms.push('Permission.FS_READ');
+  if (f.tools.includes('tool_write')) perms.push('Permission.FS_WRITE');
+  if (f.hasBash) perms.push('Permission.SHELL_EXEC');
+  if (f.hasNet) perms.push('Permission.NET_FETCH');
+
+  let lines = [];
+  lines.push(cm('# Generated by harness-decoded Architecture Playground'));
+  lines.push(cm('# See: github.com/YOUR_USERNAME/harness-decoded'));
+  lines.push('');
+  lines.push(kw('import')+' asyncio');
+  lines.push(kw('import')+' anthropic');
+  if (f.hasMemory || f.hasKairos) lines.push(kw('from')+' pathlib '+kw('import')+' Path');
+  lines.push('');
+
+  // imports from examples
+  const imports = [];
+  if (f.hasHarness) imports.push('AgentHarness');
+  if (f.hasQuery) imports.push('QueryEngine');
+  if (f.hasMemory) imports.push('MemorySystem');
+  if (f.hasAudit) imports.push('AuditLog');
+  if (f.hasPerms || perms.length) imports.push('PermissionSet', 'Permission');
+  if (f.hasFanout) imports.push('parallel_fan_out', 'SubTask');
+  if (f.hasSwarm) imports.push('SwarmOrchestrator');
+
+  const toolImports = [];
+  if (f.tools.includes('tool_read')) toolImports.push('ReadFileTool');
+  if (f.tools.includes('tool_write')) toolImports.push('WriteFileTool');
+  if (f.tools.includes('tool_list')) toolImports.push('ListDirectoryTool');
+  if (f.hasBash) toolImports.push('BashTool');
+  if (f.hasNet) toolImports.push('WebFetchTool');
+
+  if (imports.length || toolImports.length) {
+    lines.push(kw('from')+' examples.python.standard_agent.agent '+kw('import')+(` ${[...imports,...toolImports].join(', ')}`));
+    lines.push('');
+  }
+
+  lines.push(kw('async def')+' '+fn('main')+`():`);
+
+  // Client
+  lines.push(`    client = anthropic.${hl('AsyncAnthropic')}()`);
+  lines.push('');
+
+  // Tool registry
+  if (f.tools.length > 0) {
+    lines.push('    '+cm('# Tool registry'));
+    lines.push(`    registry = ${hl('ToolRegistry')}()`);
+    if (f.tools.includes('tool_read')) lines.push(`    registry.${fn('register')}(${hl('ReadFileTool')}())`);
+    if (f.tools.includes('tool_list')) lines.push(`    registry.${fn('register')}(${hl('ListDirectoryTool')}())`);
+    if (f.tools.includes('tool_write')) lines.push(`    registry.${fn('register')}(${hl('WriteFileTool')}())`);
+    if (f.hasBash) lines.push(`    registry.${fn('register')}(${hl('BashTool')}())`);
+    if (f.hasNet) lines.push(`    registry.${fn('register')}(${hl('WebFetchTool')}())`);
+    lines.push('');
+  }
+
+  // Permissions
+  lines.push('    '+cm('# Permissions'));
+  const permStr = perms.length ? `{${perms.join(', ')}}` : `{Permission.FS_READ}`;
+  lines.push(`    permissions = ${hl('PermissionSet')}(granted=${permStr})`);
+  lines.push('');
+
+  // Query Engine
+  if (f.hasQuery || f.hasHarness) {
+    lines.push(`    qe = ${hl('QueryEngine')}(client, model=${st('"claude-opus-4-6"')})`);
+    lines.push('');
+  }
+
+  // Memory
+  if (f.hasMemory || f.hasKairos) {
+    lines.push(`    memory = ${hl('MemorySystem')}(`);
+    lines.push(`        client=client, model=${st('"claude-opus-4-6"')},`);
+    if (f.hasKairos) lines.push(`        checkpoint_dir=Path(${st('".harness/checkpoints"')})`);
+    lines.push(`    )`);
+    lines.push('');
+  }
+
+  // Audit
+  if (f.hasAudit) {
+    lines.push(`    audit = ${hl('AuditLog')}(Path(${st('"./audit.jsonl"')}))`);
+    lines.push('');
+  }
+
+  // Harness
+  if (f.hasHarness) {
+    lines.push(`    harness = ${hl('AgentHarness')}(`);
+    if (f.tools.length) lines.push(`        tool_registry=registry,`);
+    lines.push(`        permissions=permissions,`);
+    lines.push(`        query_engine=qe,`);
+    if (f.hasMemory || f.hasKairos) lines.push(`        memory=memory,`);
+    if (f.hasAudit) lines.push(`        audit=audit,`);
+    lines.push(`        max_iterations=${hl('50')},`);
+    lines.push(`    )`);
+    lines.push('');
+  }
+
+  // Fan-out or Swarm
+  if (f.hasFanout) {
+    lines.push(`    subtasks = [`);
+    lines.push(`        ${hl('SubTask')}(prompt=${st('"analyze the auth module"')}, description=${st('"auth"')}),`);
+    lines.push(`        ${hl('SubTask')}(prompt=${st('"analyze the payments module"')}, description=${st('"payments"')}),`);
+    lines.push(`    ]`);
+    lines.push(`    results = ${kw('await')} ${fn('parallel_fan_out')}(`);
+    lines.push(`        subtasks=subtasks,`);
+    lines.push(`        harness_factory=${kw('lambda')}: ${hl('AgentHarness')}(...),`);
+    lines.push(`        max_concurrency=${hl('4')},`);
+    lines.push(`    )`);
+  } else if (f.hasSwarm) {
+    lines.push(`    orchestrator = ${hl('SwarmOrchestrator')}(harness_factory=..., max_agents=${hl('20')})`);
+    lines.push(`    ${kw('await')} orchestrator.${fn('spawn')}(${st('"explore and refactor the codebase"')})`);
+    lines.push(`    results = ${kw('await')} orchestrator.${fn('wait_all')}()`);
+  } else if (f.hasHarness) {
+    lines.push(`    result, trace = ${kw('await')} harness.${fn('run')}(`);
+    lines.push(`        ${st('"your task here"')}`);
+    lines.push(`    )`);
+    lines.push(`    ${fn('print')}(result)`);
+    lines.push(`    ${fn('print')}(trace.${fn('summary')}())`);
+  }
+
+  lines.push('');
+  lines.push(kw('if')+` __name__ == ${st('"__main__"')}:`);
+  lines.push(`    asyncio.${fn('run')}(${fn('main')}())`);
+
+  return lines.join('\n');
+}
+
+function generateTypeScript(f) {
+  const perms = [];
+  if (f.tools.includes('tool_read') || f.tools.includes('tool_list')) perms.push('Permission.FS_READ');
+  if (f.tools.includes('tool_write')) perms.push('Permission.FS_WRITE');
+  if (f.hasBash) perms.push('Permission.SHELL_EXEC');
+  if (f.hasNet) perms.push('Permission.NET_FETCH');
+
+  let lines = [];
+  lines.push(cm('// Generated by harness-decoded Architecture Playground'));
+  lines.push(cm('// See: github.com/YOUR_USERNAME/harness-decoded'));
+  lines.push('');
+  lines.push(kw('import')+` Anthropic ${kw('from')} ${st('"@anthropic-ai/sdk"')};`);
+  lines.push('');
+
+  const toolImports = [];
+  if (f.tools.includes('tool_read')) toolImports.push('ReadFileTool');
+  if (f.tools.includes('tool_write')) toolImports.push('WriteFileTool');
+  if (f.tools.includes('tool_list')) toolImports.push('ListDirectoryTool');
+  if (f.hasBash) toolImports.push('BashTool');
+  if (f.hasNet) toolImports.push('WebFetchTool');
+
+  const coreImports = ['AgentHarness','QueryEngine','PermissionSet','Permission','ToolRegistry'];
+  if (f.hasMemory || f.hasKairos) coreImports.push('MemorySystem');
+  if (f.hasAudit) coreImports.push('AuditLog');
+  if (f.hasFanout) coreImports.push('parallelFanOut','SubTask');
+
+  lines.push(kw('import')+` { ${[...coreImports,...toolImports].join(', ')} } ${kw('from')} ${st('"./agent"')};`);
+  lines.push('');
+
+  lines.push(kw('async function')+' '+fn('main')+`(): ${kw('Promise')}<${kw('void')}> {`);
+  lines.push(`  ${kw('const')} client = ${kw('new')} Anthropic.${hl('default')}();`);
+  lines.push('');
+
+  if (f.tools.length > 0) {
+    lines.push(`  ${kw('const')} registry = ${kw('new')} ${hl('ToolRegistry')}();`);
+    if (f.tools.includes('tool_read')) lines.push(`  registry.${fn('register')}(${kw('new')} ${hl('ReadFileTool')}());`);
+    if (f.tools.includes('tool_list')) lines.push(`  registry.${fn('register')}(${kw('new')} ${hl('ListDirectoryTool')}());`);
+    if (f.tools.includes('tool_write')) lines.push(`  registry.${fn('register')}(${kw('new')} ${hl('WriteFileTool')}());`);
+    if (f.hasBash) lines.push(`  registry.${fn('register')}(${kw('new')} ${hl('BashTool')}());`);
+    if (f.hasNet) lines.push(`  registry.${fn('register')}(${kw('new')} ${hl('WebFetchTool')}());`);
+    lines.push('');
+  }
+
+  const permStr = perms.length
+    ? `new Set([${perms.join(', ')}])`
+    : `new Set([Permission.FS_READ])`;
+  lines.push(`  ${kw('const')} permissions = ${kw('new')} ${hl('PermissionSet')}(${permStr});`);
+  lines.push('');
+
+  if (f.hasQuery || f.hasHarness) {
+    lines.push(`  ${kw('const')} qe = ${kw('new')} ${hl('QueryEngine')}(client, ${st('"claude-opus-4-6"')});`);
+    lines.push('');
+  }
+
+  if (f.hasHarness) {
+    lines.push(`  ${kw('const')} harness = ${kw('new')} ${hl('AgentHarness')}(`);
+    if (f.tools.length) lines.push(`    registry,`);
+    lines.push(`    permissions,`);
+    lines.push(`    qe,`);
+    lines.push(`    ${hl('50')}  ${cm('// maxIterations')}`);
+    lines.push(`  );`);
+    lines.push('');
+    lines.push(`  ${kw('const')} [result, trace] = ${kw('await')} harness.${fn('run')}(${st('"your task here"')});`);
+    lines.push(`  console.${fn('log')}(result);`);
+    lines.push(`  console.${fn('log')}(trace.${fn('summary')}());`);
+  } else if (f.hasFanout) {
+    lines.push(`  ${kw('const')} subtasks: SubTask[] = [`);
+    lines.push(`    { prompt: ${st('"analyze the auth module"')}, description: ${st('"auth"')} },`);
+    lines.push(`    { prompt: ${st('"analyze the payments module"')}, description: ${st('"payments"')} },`);
+    lines.push(`  ];`);
+    lines.push(`  ${kw('const')} results = ${kw('await')} ${fn('parallelFanOut')}(subtasks, () => ${kw('new')} AgentHarness(...), 4);`);
+  }
+
+  lines.push('}');
+  lines.push('');
+  lines.push(`${fn('main')}().${fn('catch')}(console.error);`);
+
+  return lines.join('\n');
+}
+
+// Auto-populate with a starter example
+window.addEventListener('load', () => {
+  addComponent({type:'harness',color:'#8b5cf6',label:'AgentHarness',tag:'orchestration loop'}, 160, 80);
+  addComponent({type:'query',color:'#60a5fa',label:'Query Engine',tag:'LLM calls + retry'}, 160, 200);
+  addComponent({type:'tool_read',color:'#f59e0b',label:'ReadFileTool',tag:'FS_READ'}, 380, 100);
+  addComponent({type:'tool_list',color:'#f59e0b',label:'ListDirectoryTool',tag:'FS_READ'}, 380, 190);
+  addComponent({type:'perms',color:'#7070a0',label:'PermissionSet',tag:'access control'}, 160, 320);
+});
+</script>
+</body>
+</html>

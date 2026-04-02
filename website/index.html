@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>harness-decoded — Claude Code Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0a0f;
+    --bg2:      #11111a;
+    --bg3:      #1a1a28;
+    --border:   rgba(120,120,200,0.12);
+    --border2:  rgba(120,120,200,0.22);
+    --text:     #e2e2f0;
+    --muted:    #7070a0;
+    --purple:   #8b5cf6;
+    --purple2:  #a78bfa;
+    --teal:     #2dd4bf;
+    --amber:    #f59e0b;
+    --coral:    #f97316;
+    --green:    #34d399;
+    --blue:     #60a5fa;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-head: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--purple);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  h1 {
+    font-family: var(--font-head);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.35s forwards;
+  }
+
+  h1 span { color: var(--purple2); }
+
+  .hero-sub {
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.5s forwards;
+  }
+
+  .hero-sub strong { color: var(--text); }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.65s forwards;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+  }
+  .btn-primary:hover { background: var(--purple2); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { border-color: var(--purple); color: var(--purple2); }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    animation: pulse 2s infinite;
+  }
+
+  .scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--purple), transparent);
+  }
+
+  /* ── SECTION COMMON ── */
+  section {
+    position: relative;
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--purple);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 3rem;
+    font-size: 14px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  /* ── HARNESS DIAGRAM ── */
+  .diagram-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6rem 2rem;
+  }
+
+  .diagram-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .harness-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 3rem 0;
+  }
+
+  .harness-layer {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg3);
+    position: relative;
+  }
+
+  .harness-layer:hover {
+    border-color: var(--border2);
+    transform: translateX(4px);
+  }
+
+  .harness-layer.active {
+    border-color: var(--purple);
+    background: rgba(139,92,246,0.06);
+  }
+
+  .layer-accent {
+    width: 4px;
+    flex-shrink: 0;
+  }
+
+  .layer-body {
+    flex: 1;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .layer-name {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 15px;
+    min-width: 220px;
+    color: var(--text);
+  }
+
+  .layer-desc {
+    color: var(--muted);
+    font-size: 12px;
+    flex: 1;
+  }
+
+  .layer-stat {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .layer-detail {
+    display: none;
+    padding: 1.5rem 1.5rem 1.5rem 3.5rem;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.9;
+  }
+
+  .layer-detail.open { display: block; }
+
+  .layer-detail code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--teal);
+    font-size: 12px;
+  }
+
+  /* ── REQUEST LIFECYCLE ── */
+  .lifecycle-section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .lifecycle-steps {
+    display: grid;
+    gap: 1px;
+    margin-top: 3rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lifecycle-step {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .lifecycle-step:last-child { border-bottom: none; }
+  .lifecycle-step:hover { background: var(--bg3); }
+  .lifecycle-step.active { background: rgba(139,92,246,0.07); }
+
+  .step-num {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--border2);
+    text-align: center;
+    transition: color 0.2s;
+  }
+
+  .lifecycle-step.active .step-num { color: var(--purple); }
+
+  .step-content {}
+  .step-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .step-detail { color: var(--muted); font-size: 12px; }
+
+  .step-tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  /* ── KEY FINDINGS ── */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 3rem;
+  }
+
+  .finding-card {
+    background: var(--bg2);
+    padding: 2rem;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .finding-card:hover { background: var(--bg3); }
+
+  .finding-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .finding-title {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .finding-text {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .finding-text strong { color: var(--text); }
+
+  /* ── CODE COMPARE ── */
+  .code-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 3rem;
+  }
+
+  .code-pane {
+    background: var(--bg2);
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .code-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .code-label { color: var(--muted); }
+
+  pre {
+    padding: 1.5rem;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  pre .kw  { color: var(--purple2); }
+  pre .fn  { color: var(--blue); }
+  pre .str { color: var(--green); }
+  pre .cm  { color: #444466; font-style: italic; }
+  pre .hl  { color: var(--text); }
+  pre .bad { color: var(--coral); }
+  pre .num { color: var(--amber); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--purple); }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 2;
+  }
+
+  footer a { color: var(--purple2); text-decoration: none; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @media (max-width: 700px) {
+    .code-compare { grid-template-columns: 1fr; }
+    .layer-body { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .layer-name { min-width: unset; }
+    .nav-links { display: none; }
+    .lifecycle-step { grid-template-columns: 48px 1fr; }
+    .lifecycle-step .step-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">harness<span>-decoded</span></a>
+  <ul class="nav-links">
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#lifecycle">Lifecycle</a></li>
+    <li><a href="#findings">Findings</a></li>
+    <li><a href="#code">Code</a></li>
+    <li><a href="https://github.com/YOUR_USERNAME/harness-decoded" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" style="padding-top:6rem;">
+  <div class="hero-glow"></div>
+  <p class="eyebrow">Claude Code Architecture · Decoded</p>
+  <h1>The <span>harness</span><br>not the model</h1>
+  <p class="hero-sub">
+    The March 2026 source leak revealed something profound:
+    <strong>Claude Code's innovation isn't the AI — it's the execution framework around it.</strong>
+    512,000 lines. 40+ tools. A memory daemon. A stealth commit mode.
+    This is the architecture, decoded.
+  </p>
+  <div class="hero-actions">
+    <a href="#architecture" class="btn btn-primary">Explore Architecture</a>
+    <a href="https://github.com/YOUR_USERNAME/harness-decoded" class="btn btn-ghost" target="_blank">View on GitHub</a>
+  </div>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HARNESS DIAGRAM -->
+<div class="diagram-section" id="architecture">
+  <div class="diagram-inner">
+    <p class="section-label">Core Architecture</p>
+    <h2 class="section-title">The Harness: Five Layers</h2>
+    <p class="section-desc">Click any layer to expand its internals. The model sits below all five — it's one component, not the system.</p>
+
+    <div class="harness-stack">
+
+      <!-- Layer: Tool System -->
+      <div class="harness-layer" onclick="toggleLayer(this)">
+        <div class="layer-accent" style="background:var(--amber)"></div>
+        <div class="layer-body">
+          <div class="layer-name">Tool System</div>
+          <div class="layer-desc">40+ tools · permission-gated · sandboxed execution · typed I/O</div>
+          <div class="layer-stat" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">~29K lines</div>
+        </div>
+        <div class="layer-detail">
+          The largest conceptual surface in the harness. Each tool is not just a function — it's a typed, validated, permission-gated unit with its own error taxonomy. Before any tool executes, the harness checks <code>requiredPermissions</code> against the session's <code>PermissionSet</code>. Tools that write files require <code>FS_WRITE</code>; shell execution requires <code>SHELL_EXEC</code> (denied by default). The <code>undercover.ts</code> tool context flag suppresses AI attribution in git commits when operating in public repos. Notable tools: <code>bash</code>, <code>read_file</code>, <code>patch_file</code>, <code>web_fetch</code>, <code>spawn_subagent</code>, <code>ask_user</code>.
+        </div>
+      </div>
+
+      <!-- Layer: Query Engine -->
+      <div class="harness-layer" onclick="toggleLayer(this)">
+        <div class="layer-accent" style="background:var(--blue)"></div>
+        <div class="layer-body">
+          <div class="layer-name">Query Engine</div>
+          <div class="layer-desc">streaming · backpressure · retry logic · token accounting · response caching</div>
+          <div class="layer-stat" style="background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)">~46K lines</div>
+        </div>
+        <div class="layer-detail">
+          The largest single module in the codebase at ~46K lines — which tells you how much complexity lives in "just calling an API." The engine handles streaming responses token-by-token, building tool call structures incrementally. Retry logic distinguishes retryable errors (429, 529, 500, 503) from fatal ones (400, 401). Exponential backoff with jitter on rate limits. Context-length errors trigger compaction and a single retry. Response caching deduplicates identical tool-observation sequences across subagents. Token accounting tracks per-call and per-session costs with configurable budget limits.
+        </div>
+      </div>
+
+      <!-- Layer: Memory System -->
+      <div class="harness-layer" onclick="toggleLayer(this)">
+        <div class="layer-accent" style="background:var(--teal)"></div>
+        <div class="layer-body">
+          <div class="layer-name">Memory System</div>
+          <div class="layer-desc">autoCompact · KAIROS daemon · autoDream consolidation · checkpointing</div>
+          <div class="layer-stat" style="background:rgba(45,212,191,0.1);color:var(--teal);border:1px solid rgba(45,212,191,0.2)">KAIROS</div>
+        </div>
+        <div class="layer-detail">
+          Three subsystems. <code>autoCompact</code> triggers at ~85% context capacity, summarizing history while preserving task spec, constraints, and progress. <code>KAIROS</code> is a daemon that runs in a <em>forked subprocess</em> while the user is idle — the fork isolation ensures it cannot corrupt the live agent context. <code>autoDream</code> runs inside KAIROS: reads all session transcripts, merges overlapping observations, resolves contradictions (newer wins), converts tentative notes to durable facts. The result is checkpointed and loaded at next session start. A leaked internal metric: 1,279 sessions/day were burning ~250K API calls on consecutive compaction failures before the <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code> fix.
+        </div>
+      </div>
+
+      <!-- Layer: Multi-Agent -->
+      <div class="harness-layer" onclick="toggleLayer(this)">
+        <div class="layer-accent" style="background:var(--purple)"></div>
+        <div class="layer-body">
+          <div class="layer-name">Multi-Agent Orchestrator</div>
+          <div class="layer-desc">task decomposition · subagent spawning · fan-out patterns · result aggregation</div>
+          <div class="layer-stat" style="background:rgba(139,92,246,0.1);color:var(--purple2);border:1px solid rgba(139,92,246,0.2)">swarm</div>
+        </div>
+        <div class="layer-detail">
+          Three coordination patterns. <strong>Sequential</strong>: default, subagents run one at a time. <strong>Parallel fan-out</strong>: independent subtasks spawn concurrently, results gathered at a barrier. <strong>Swarm</strong>: subagents dynamically spawn further subagents as they discover complexity; the orchestrator receives async reports. Each subagent receives a scoped context — task-specific, not the full session history — reducing token costs and preventing information bleed between independent subtasks. Subagent failure policies: retry, skip, or abort propagation configurable per spawn.
+        </div>
+      </div>
+
+      <!-- Layer: IDE Bridge -->
+      <div class="harness-layer" onclick="toggleLayer(this)">
+        <div class="layer-accent" style="background:var(--coral)"></div>
+        <div class="layer-body">
+          <div class="layer-name">IDE Bridge</div>
+          <div class="layer-desc">terminal UI (Ink) · VSCode extension · JetBrains plugin · approval protocol</div>
+          <div class="layer-stat" style="background:rgba(249,115,22,0.1);color:var(--coral);border:1px solid rgba(249,115,22,0.2)">bidirectional</div>
+        </div>
+        <div class="layer-detail">
+          Three implementations, one protocol. The terminal UI uses <code>Ink</code> (React for terminals), explaining why Claude Code's output renders as a structured UI rather than scrolling text. VSCode and JetBrains extensions communicate over a local socket. The bridge sends: file contents, cursor position, selection, active diagnostics. It receives: diffs for preview, approval requests for destructive operations, agent status. The bridge is deliberately thin — it serializes intent, but makes no AI decisions. This separation means the harness is testable headlessly.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Model at bottom -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:3px;padding:1rem;border:1px dashed var(--border2);border-radius:8px;color:var(--muted);font-size:13px;">
+      <span style="color:var(--purple2);">◆</span>
+      <span>Claude Model (Anthropic API) — <em>one component among five, not the system</em></span>
+      <span style="color:var(--purple2);">◆</span>
+    </div>
+  </div>
+</div>
+
+<!-- LIFECYCLE -->
+<section class="lifecycle-section" id="lifecycle">
+  <p class="section-label">Request Lifecycle</p>
+  <h2 class="section-title">What happens when you<br>send a message</h2>
+  <p class="section-desc">A single agent request passes through every layer. Click each step to see what's happening inside.</p>
+
+  <div class="lifecycle-steps">
+
+    <div class="lifecycle-step active" onclick="selectStep(this)">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-name">IDE Bridge receives task</div>
+        <div class="step-detail">Serializes user input, active file, cursor position → structured TaskObject</div>
+      </div>
+      <div class="step-tag" style="color:var(--coral);border-color:rgba(249,115,22,0.3)">IDE Bridge</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-name">Orchestrator decomposes</div>
+        <div class="step-detail">Decides: single agent or multi-agent fan-out? Allocates context budget per subagent.</div>
+      </div>
+      <div class="step-tag" style="color:var(--purple2);border-color:rgba(139,92,246,0.3)">Orchestrator</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-name">Memory System loads context</div>
+        <div class="step-detail">Injects session summary from last autoDream consolidation. Attaches project-level notes.</div>
+      </div>
+      <div class="step-tag" style="color:var(--teal);border-color:rgba(45,212,191,0.3)">Memory</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <div class="step-name">Query Engine calls LLM</div>
+        <div class="step-detail">Streams response. Parses tool_use blocks incrementally. Accounts tokens against budget.</div>
+      </div>
+      <div class="step-tag" style="color:var(--blue);border-color:rgba(96,165,250,0.3)">Query Engine</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <div class="step-name">Tool System executes</div>
+        <div class="step-detail">Validates input schema. Checks permissions. Runs in sandbox. Classifies errors (retryable / fatal / needs-human).</div>
+      </div>
+      <div class="step-tag" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">Tools</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <div class="step-name">Memory threshold check</div>
+        <div class="step-detail">If context > 85%, trigger autoCompact before next LLM call. Checkpoint raw messages to disk.</div>
+      </div>
+      <div class="step-tag" style="color:var(--teal);border-color:rgba(45,212,191,0.3)">Memory</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">07</div>
+      <div class="step-content">
+        <div class="step-name">Loop until complete</div>
+        <div class="step-detail">Steps 4–6 repeat. Approval gates surface destructive actions. Max iteration guard prevents runaway.</div>
+      </div>
+      <div class="step-tag" style="color:var(--blue);border-color:rgba(96,165,250,0.3)">Agent Loop</div>
+    </div>
+
+    <div class="lifecycle-step" onclick="selectStep(this)">
+      <div class="step-num">08</div>
+      <div class="step-content">
+        <div class="step-name">Result surfaces to IDE</div>
+        <div class="step-detail">Diff preview sent to bridge. KAIROS daemon queued to consolidate session transcript on idle.</div>
+      </div>
+      <div class="step-tag" style="color:var(--coral);border-color:rgba(249,115,22,0.3)">IDE Bridge</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KEY FINDINGS -->
+<section id="findings" style="padding:6rem 2rem;max-width:1100px;margin:0 auto;">
+  <p class="section-label">From the Leaked Source</p>
+  <h2 class="section-title">What we learned</h2>
+  <p class="section-desc">Key architectural facts that emerged from the March 2026 source map leak.</p>
+
+  <div class="findings-grid">
+
+    <div class="finding-card">
+      <div class="finding-icon">⚙️</div>
+      <div class="finding-title">46K lines in the Query Engine</div>
+      <div class="finding-text">The module that "just calls the API" is the largest in the codebase. Streaming, retry, backpressure, caching, token accounting — none of it is trivial at production scale.</div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-icon">🔧</div>
+      <div class="finding-title">29K lines in the Tool System</div>
+      <div class="finding-text">Each of 40+ tools ships with <strong>typed schemas, permission requirements, error taxonomy, and sandbox config</strong>. "Execute bash" is 29,000 lines when done safely.</div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-icon">🧠</div>
+      <div class="finding-title">Memory runs in a fork</div>
+      <div class="finding-text">The KAIROS daemon runs in a <strong>forked subprocess</strong> to prevent memory consolidation from corrupting the live agent context. Process isolation as a correctness guarantee.</div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-icon">🕵️</div>
+      <div class="finding-title">Undercover Mode</div>
+      <div class="finding-text"><code>undercover.ts</code> blocks internal codenames (Capybara, Tengu) from commit messages and suppresses AI attribution when operating in public open-source repositories.</div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-icon">📊</div>
+      <div class="finding-title">250K API calls wasted daily</div>
+      <div class="finding-text">A comment in the source: before <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code>, 1,279 sessions/day were burning ~250,000 API calls on consecutive compaction failures. Fixed in 3 lines.</div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-icon">🚀</div>
+      <div class="finding-title">Next model: Capybara</div>
+      <div class="finding-text">The source references beta flags for a model family codenamed <strong>Capybara</strong> with a significantly larger context window. "Fast" and "slow" variants implied by the routing logic.</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CODE COMPARE -->
+<section id="code" style="padding:6rem 2rem;max-width:1100px;margin:0 auto;">
+  <p class="section-label">Implementation</p>
+  <h2 class="section-title">Wrapper vs Harness</h2>
+  <p class="section-desc">The same "run an agent" task — two fundamentally different approaches. This is why production systems fail.</p>
+
+  <div class="code-compare">
+    <div class="code-pane">
+      <div class="code-header">
+        <div class="code-dot" style="background:var(--coral)"></div>
+        <span class="code-label">wrapper.py — what most people build</span>
+      </div>
+<pre><span class="cm"># Looks fine. Falls apart in production.</span>
+
+<span class="kw">def</span> <span class="fn">run_agent</span>(task: <span class="hl">str</span>) -> <span class="hl">str</span>:
+    messages = [
+        {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: task}
+    ]
+
+    <span class="kw">while</span> <span class="hl">True</span>:
+        resp = client.messages.create(
+            model=<span class="str">"claude-opus-4-5"</span>,
+            messages=messages,
+            <span class="cm"># no tools defined properly</span>
+            <span class="cm"># no retry logic</span>
+            <span class="cm"># no token budget</span>
+        )
+
+        <span class="kw">if</span> resp.stop_reason == <span class="str">"end_turn"</span>:
+            <span class="kw">return</span> resp.content[<span class="num">0</span>].text
+
+        <span class="cm"># 😬 context grows until crash</span>
+        messages.append({
+            <span class="str">"role"</span>: <span class="str">"assistant"</span>,
+            <span class="str">"content"</span>: resp.content
+        })
+        <span class="cm"># no permission checks</span>
+        <span class="cm"># no audit trail</span>
+        <span class="cm"># no max_iterations guard</span>
+        result = <span class="bad">eval</span>(extract_tool_call(resp))
+        messages.append(result)</pre>
+    </div>
+
+    <div class="code-pane">
+      <div class="code-header">
+        <div class="code-dot" style="background:var(--green)"></div>
+        <span class="code-label">harness.py — what Claude Code taught us</span>
+      </div>
+<pre><span class="cm"># Every failure mode handled explicitly.</span>
+
+<span class="kw">async def</span> <span class="fn">run</span>(<span class="hl">self</span>, task: <span class="hl">str</span>):
+    trace = <span class="fn">ExecutionTrace</span>(task)
+    messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: task}]
+
+    <span class="kw">while</span> trace.iterations < <span class="hl">self</span>.max_iterations:
+        trace.iterations += <span class="num">1</span>
+
+        <span class="cm"># retry logic inside query engine</span>
+        resp = <span class="kw">await</span> <span class="hl">self</span>.query_engine.<span class="fn">call</span>(
+            messages, tools, system, trace
+        )
+
+        <span class="kw">if</span> resp.stop_reason == <span class="str">"end_turn"</span>:
+            <span class="kw">return</span> <span class="fn">extract_text</span>(resp), trace
+
+        <span class="kw">for</span> block <span class="kw">in</span> resp.content:
+            <span class="cm"># permission check before execution</span>
+            tool = <span class="hl">self</span>.registry.<span class="fn">get</span>(block.name)
+            result = <span class="kw">await</span> tool.<span class="fn">execute</span>(
+                block.input,
+                <span class="hl">self</span>.permissions  <span class="cm"># enforced</span>
+            )
+            trace.tool_calls.<span class="fn">append</span>(...)  <span class="cm"># audited</span>
+
+        <span class="cm"># memory compaction if needed</span>
+        messages = <span class="kw">await</span> <span class="hl">self</span>.memory.<span class="fn">maybe_compact</span>(
+            messages
+        )</pre>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem;text-align:center;">
+    <a href="examples/python/minimal_agent/agent.py" class="btn btn-ghost">View full Python source</a>
+    &nbsp;&nbsp;
+    <a href="examples/typescript/minimal-agent/agent.ts" class="btn btn-ghost">View TypeScript source</a>
+  </div>
+
+  <div style="margin-top:2rem;text-align:center;padding:2rem 0;">
+    <p style="color:var(--muted);font-size:13px;margin-bottom:1.5rem;">Explore more in depth</p>
+    <a href="website/kairos.html" class="btn btn-ghost" style="margin-right:.75rem;">KAIROS &amp; autoDream →</a>
+    <a href="website/playground.html" class="btn btn-primary">Architecture Playground →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong style="color:var(--text)">harness-decoded</strong> — An open analysis of the Claude Code architecture.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="https://github.com/YOUR_USERNAME/harness-decoded">GitHub</a> ·
+    <a href="docs/01-architecture.md">Architecture Docs</a> ·
+    <a href="docs/02-harness-vs-wrapper.md">Harness vs Wrapper</a>
+  </p>
+  <p style="margin-top:1rem;font-size:11px;">No leaked source code is reproduced here. All examples are original implementations. MIT License.</p>
+</footer>
+
+<script>
+  function toggleLayer(el) {
+    const detail = el.querySelector('.layer-detail');
+    const isOpen = detail.classList.contains('open');
+    document.querySelectorAll('.layer-detail').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.harness-layer').forEach(l => l.classList.remove('active'));
+    if (!isOpen) {
+      detail.classList.add('open');
+      el.classList.add('active');
+    }
+  }
+
+  function selectStep(el) {
+    document.querySelectorAll('.lifecycle-step').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Scroll animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.finding-card, .harness-layer, .lifecycle-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.4s, transform 0.4s';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>

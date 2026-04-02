@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAIROS & autoDream — harness-decoded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --bg2: #11111a; --bg3: #1a1a28;
+    --border: rgba(120,120,200,0.12); --border2: rgba(120,120,200,0.25);
+    --text: #e2e2f0; --muted: #7070a0;
+    --purple: #8b5cf6; --purple2: #a78bfa;
+    --teal: #2dd4bf; --amber: #f59e0b; --coral: #f97316;
+    --green: #34d399; --blue: #60a5fa;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-head: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: var(--font-head); font-weight: 800; font-size: 16px; color: var(--text); text-decoration: none; }
+  .nav-logo span { color: var(--purple); }
+  .nav-back { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .nav-back:hover { color: var(--purple2); }
+
+  .hero { padding: 8rem 2rem 4rem; max-width: 900px; margin: 0 auto; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.2em; color: var(--teal); text-transform: uppercase; margin-bottom: 1rem; }
+  h1 { font-family: var(--font-head); font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+  h1 em { color: var(--teal); font-style: normal; }
+  .hero-desc { color: var(--muted); max-width: 560px; font-size: 14px; line-height: 1.9; }
+
+  /* ── TIMELINE ── */
+  .timeline-section { max-width: 900px; margin: 0 auto; padding: 2rem 2rem 6rem; }
+  .timeline-label { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 2rem; }
+
+  .timeline { position: relative; padding-left: 2px; }
+  .timeline::before { content: ''; position: absolute; left: 119px; top: 0; bottom: 0; width: 1px; background: var(--border2); }
+
+  .t-row { display: grid; grid-template-columns: 110px 1fr; gap: 2rem; margin-bottom: 0; }
+  .t-time { text-align: right; font-size: 11px; color: var(--muted); padding-top: 1.1rem; letter-spacing: 0.05em; white-space: nowrap; }
+
+  .t-event { position: relative; padding: 1rem 1.25rem 1rem 1.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2); margin-bottom: 6px; cursor: pointer; transition: all 0.2s; }
+  .t-event::before { content: ''; position: absolute; left: -1.57rem; top: 1.2rem; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border2); background: var(--bg); transition: all 0.2s; }
+  .t-event:hover { border-color: var(--border2); }
+  .t-event.active { border-color: var(--teal); background: rgba(45,212,191,0.05); }
+  .t-event.active::before { background: var(--teal); border-color: var(--teal); box-shadow: 0 0 8px rgba(45,212,191,0.4); }
+
+  .t-process::before { border-color: var(--purple); }
+  .t-process.active::before { background: var(--purple); border-color: var(--purple); box-shadow: 0 0 8px rgba(139,92,246,0.4); }
+  .t-process { border-color: rgba(139,92,246,0.2); }
+  .t-process:hover { border-color: rgba(139,92,246,0.4); }
+  .t-process.active { border-color: var(--purple); background: rgba(139,92,246,0.05); }
+
+  .t-output::before { border-color: var(--amber); }
+  .t-output.active::before { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+  .t-output { border-color: rgba(245,158,11,0.2); }
+  .t-output:hover { border-color: rgba(245,158,11,0.4); }
+  .t-output.active { border-color: var(--amber); background: rgba(245,158,11,0.05); }
+
+  .t-title { font-weight: 500; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+  .t-sub { font-size: 12px; color: var(--muted); }
+  .t-expand { display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.9; }
+  .t-expand.open { display: block; }
+  .t-expand code { background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--teal); }
+
+  /* ── PASSES ── */
+  .passes-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 5rem 2rem; }
+  .passes-inner { max-width: 900px; margin: 0 auto; }
+  .section-label { font-size: 11px; letter-spacing: 0.2em; color: var(--purple); text-transform: uppercase; margin-bottom: 0.75rem; }
+  .section-title { font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 0.75rem; }
+  .section-desc { color: var(--muted); max-width: 540px; margin-bottom: 3rem; font-size: 13px; }
+
+  .passes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .pass-card { background: var(--bg); padding: 1.5rem; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .pass-num { font-family: var(--font-head); font-size: 2.5rem; font-weight: 800; color: var(--border2); margin-bottom: 0.5rem; }
+  .pass-title { font-weight: 500; font-size: 14px; color: var(--text); margin-bottom: 0.5rem; }
+  .pass-desc { font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+  /* ── MEMORY FORMAT ── */
+  .memory-section { max-width: 900px; margin: 0 auto; padding: 5rem 2rem; }
+  .memory-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .memory-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  .mem-dot { width: 8px; height: 8px; border-radius: 50%; }
+  pre.memory-json { padding: 1.5rem; font-size: 12px; line-height: 1.8; color: var(--muted); overflow-x: auto; }
+  .j-key { color: var(--blue); }
+  .j-str { color: var(--green); }
+  .j-num { color: var(--amber); }
+  .j-brac { color: var(--muted); }
+
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 12px; }
+  footer a { color: var(--purple2); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">harness<span>-decoded</span></a>
+  <a href="index.html" class="nav-back">← back to overview</a>
+</nav>
+
+<div class="hero">
+  <p class="eyebrow">Memory System · Deep Dive</p>
+  <h1>KAIROS &<br><em>autoDream</em></h1>
+  <p class="hero-desc">
+    Claude Code runs a background daemon while you're idle. It reads every session transcript,
+    resolves contradictions, promotes tentative observations to facts, and synthesizes patterns
+    across sessions. This is how the agent gets smarter over time without a fine-tune.
+  </p>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-section">
+  <p class="timeline-label">Session lifecycle — click any event to expand</p>
+
+  <div class="timeline">
+
+    <div class="t-row">
+      <div class="t-time">T+0:00</div>
+      <div class="t-event active" onclick="toggle(this)">
+        <div class="t-title">Session starts</div>
+        <div class="t-sub">Memory store loaded from .harness/memory.json</div>
+        <div class="t-expand open">
+          The harness reads the consolidated memory store produced by the last KAIROS run.
+          Facts, patterns, and open questions are injected as a context prefix before the
+          user's task. The agent starts with accumulated project knowledge — it doesn't
+          have to re-discover that <code>src/config.py</code> is frequently modified, or that
+          the JWT tests are flaky.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+0:01</div>
+      <div class="t-event" onclick="toggle(this)">
+        <div class="t-title">Agent loop runs</div>
+        <div class="t-sub">Tool calls, LLM iterations, context accumulates</div>
+        <div class="t-expand">
+          Normal agent operation. Each tool call result and LLM response is added to the
+          message history. If context exceeds 85%, <code>autoCompact</code> triggers and
+          summarizes the history. Raw messages are checkpointed to disk before any
+          compaction — KAIROS will need them later.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+0:45</div>
+      <div class="t-event" onclick="toggle(this)">
+        <div class="t-title">autoCompact triggered</div>
+        <div class="t-sub">Context at 87% capacity → checkpoint + LLM summarization</div>
+        <div class="t-expand">
+          The memory system estimates token count. At 87%, it checkpoints the raw messages
+          to <code>.harness/checkpoints/checkpoint_{session_id}_{timestamp}.jsonl</code>
+          then calls the LLM to produce a structured summary preserving task spec,
+          completed work, current state, open questions, and key facts.
+          The raw messages are replaced by the summary. The agent continues.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:23</div>
+      <div class="t-event" onclick="toggle(this)">
+        <div class="t-title">Session ends (user idle)</div>
+        <div class="t-sub">Final result delivered. KAIROS daemon queued.</div>
+        <div class="t-expand">
+          The agent delivers its final response. The harness writes the complete session
+          transcript to the checkpoint directory and queues the KAIROS daemon.
+          KAIROS is started as a forked subprocess — the main process exits immediately
+          without waiting for KAIROS to complete. If KAIROS crashes, the main process is unaffected.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:24</div>
+      <div class="t-event t-process" onclick="toggle(this)">
+        <div class="t-title">KAIROS daemon starts (forked)</div>
+        <div class="t-sub">Independent subprocess — cannot corrupt live context</div>
+        <div class="t-expand">
+          KAIROS runs in a completely isolated process. It reads session checkpoints
+          from disk, loads the existing memory store, and begins autoDream consolidation.
+          It has its own API key usage, its own error handling, its own log file.
+          A bug in KAIROS cannot affect the next session — the worst case is the
+          memory store isn't updated.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:25</div>
+      <div class="t-event t-process" onclick="toggle(this)">
+        <div class="t-title">autoDream: Pass 1 — Observation extraction</div>
+        <div class="t-sub">Session transcripts → atomic facts</div>
+        <div class="t-expand">
+          Each session checkpoint is read and reduced to atomic observations.
+          "Read src/auth.py. It uses JWT with HS256. The secret is in ENV['JWT_SECRET']."
+          becomes three observations: <code>src/auth.py exists</code>,
+          <code>JWT algorithm: HS256</code>, <code>JWT_SECRET loaded from env</code>.
+          Observations are tagged with session ID and timestamp for provenance.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:28</div>
+      <div class="t-event t-process" onclick="toggle(this)">
+        <div class="t-title">autoDream: Pass 2 — Deduplication</div>
+        <div class="t-sub">Merge with existing memory store, newer wins on conflicts</div>
+        <div class="t-expand">
+          New observations are merged with the existing memory store.
+          Identical observations are deduplicated. Near-identical observations
+          (detected via semantic similarity) are merged into the more recent version.
+          The "last seen" timestamp is updated for observations that recur,
+          giving KAIROS a signal about which facts are stable vs. transient.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:31</div>
+      <div class="t-event t-process" onclick="toggle(this)">
+        <div class="t-title">autoDream: Pass 3-5 — Contradiction, certainty, synthesis</div>
+        <div class="t-sub">Resolve conflicts, promote tentative facts, identify patterns</div>
+        <div class="t-expand">
+          <strong>Pass 3</strong>: Contradictions are resolved (newer observation wins,
+          old one archived with a note). <br/>
+          <strong>Pass 4</strong>: Tentative observations ("unclear if X") that were
+          confirmed or denied in later sessions are promoted or retracted. <br/>
+          <strong>Pass 5</strong>: Patterns across sessions are synthesized —
+          frequently-touched files, recurring errors, established conventions.
+          These become high-confidence notes injected prominently in future session context.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+1:35</div>
+      <div class="t-event t-output" onclick="toggle(this)">
+        <div class="t-title">Updated memory store written</div>
+        <div class="t-sub">.harness/memory.json overwritten with consolidated knowledge</div>
+        <div class="t-expand">
+          KAIROS writes the updated memory store atomically (write to temp file, rename).
+          The store now contains facts from this session merged with all previous sessions,
+          with contradictions resolved and patterns synthesized.
+          KAIROS exits cleanly. The checkpoint files are retained for debugging.
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row">
+      <div class="t-time">T+next</div>
+      <div class="t-event t-output" onclick="toggle(this)">
+        <div class="t-title">Next session loads consolidated memory</div>
+        <div class="t-sub">Agent starts with accumulated project knowledge</div>
+        <div class="t-expand">
+          The next session loads the updated memory store. The agent now knows:
+          which files change frequently, which tests are flaky, which APIs have
+          undocumented behavior encountered in previous sessions. It doesn't have to
+          re-discover any of this. The first tool calls can be targeted rather than exploratory.
+          This is the compounding return on KAIROS investment.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AUTODREAM PASSES -->
+<div class="passes-section">
+  <div class="passes-inner">
+    <p class="section-label">autoDream algorithm</p>
+    <h2 class="section-title">Five consolidation passes</h2>
+    <p class="section-desc">autoDream is not trying to index the codebase. It's building meta-knowledge: what the agent has learned that's slow to derive and useful across many sessions.</p>
+
+    <div class="passes-grid">
+      <div class="pass-card">
+        <div class="pass-num" style="color:rgba(96,165,250,0.3)">01</div>
+        <div class="pass-title">Observation extraction</div>
+        <div class="pass-desc">Session transcripts → atomic, tagged facts. Each observation carries session ID + timestamp for provenance tracking.</div>
+      </div>
+      <div class="pass-card">
+        <div class="pass-num" style="color:rgba(45,212,191,0.3)">02</div>
+        <div class="pass-title">Deduplication</div>
+        <div class="pass-desc">Merge with existing store. Identical observations deduplicated. Near-identical merged into the more recent version.</div>
+      </div>
+      <div class="pass-card">
+        <div class="pass-num" style="color:rgba(139,92,246,0.3)">03</div>
+        <div class="pass-title">Contradiction resolution</div>
+        <div class="pass-desc">When two observations conflict, newer wins. Old observation archived with resolution note for debugging.</div>
+      </div>
+      <div class="pass-card">
+        <div class="pass-num" style="color:rgba(245,158,11,0.3)">04</div>
+        <div class="pass-title">Certainty promotion</div>
+        <div class="pass-desc">Tentative notes confirmed by later sessions become facts. Unresolved tentatives keep their uncertainty marker.</div>
+      </div>
+      <div class="pass-card" style="grid-column: span 2;">
+        <div class="pass-num" style="color:rgba(52,211,153,0.3)">05</div>
+        <div class="pass-title">Pattern synthesis</div>
+        <div class="pass-desc">Cross-session patterns made explicit: frequently-modified files, recurring failures, established conventions, high-coupling modules. These become prominent context in future sessions — the agent doesn't re-derive what it already learned.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY FORMAT -->
+<div class="memory-section">
+  <p class="section-label">Memory store format</p>
+  <h2 class="section-title" style="font-family:var(--font-head);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:0.75rem;">.harness/memory.json</h2>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:2rem;">The output of autoDream. Loaded at the start of every session.</p>
+
+  <div class="memory-box">
+    <div class="memory-header">
+      <div class="mem-dot" style="background:var(--amber)"></div>
+      <span>.harness/memory.json</span>
+    </div>
+<pre class="memory-json">{
+  <span class="j-key">"project"</span>: <span class="j-str">"my-service"</span>,
+  <span class="j-key">"last_updated"</span>: <span class="j-str">"2025-11-15T14:23:00Z"</span>,
+  <span class="j-key">"session_count"</span>: <span class="j-num">12</span>,
+
+  <span class="j-key">"facts"</span>: [
+    {
+      <span class="j-key">"content"</span>: <span class="j-str">"JWT secret loaded from ENV['JWT_SECRET'], HS256 algorithm"</span>,
+      <span class="j-key">"certainty"</span>: <span class="j-str">"confirmed"</span>,
+      <span class="j-key">"last_seen"</span>: <span class="j-str">"2025-11-15"</span>,
+      <span class="j-key">"source_session"</span>: <span class="j-str">"session_2025-11-01"</span>
+    },
+    {
+      <span class="j-key">"content"</span>: <span class="j-str">"tests/test_auth.py exists and covers JWT validation"</span>,
+      <span class="j-key">"certainty"</span>: <span class="j-str">"confirmed"</span>,
+      <span class="j-key">"last_seen"</span>: <span class="j-str">"2025-11-12"</span>
+    }
+  ],
+
+  <span class="j-key">"patterns"</span>: [
+    {
+      <span class="j-key">"content"</span>: <span class="j-str">"src/config.py is a frequent change point — check early when debugging failures"</span>,
+      <span class="j-key">"confidence"</span>: <span class="j-num">0.85</span>,
+      <span class="j-key">"supporting_sessions"</span>: <span class="j-num">8</span>
+    }
+  ],
+
+  <span class="j-key">"open_questions"</span>: [
+    {
+      <span class="j-key">"content"</span>: <span class="j-str">"RS256 migration: key loading code still missing?"</span>,
+      <span class="j-key">"first_raised"</span>: <span class="j-str">"2025-11-01"</span>,
+      <span class="j-key">"last_seen"</span>: <span class="j-str">"2025-11-12"</span>
+    }
+  ]
+}</pre>
+  </div>
+</div>
+
+<footer>
+  <p><a href="index.html">harness-decoded</a> — <a href="../docs/05-memory-context.md">Read the full Memory & Context doc →</a></p>
+</footer>
+
+<script>
+function toggle(el) {
+  const exp = el.querySelector('.t-expand');
+  const isOpen = exp.classList.contains('open');
+  document.querySelectorAll('.t-expand').forEach(e => e.classList.remove('open'));
+  document.querySelectorAll('.t-event').forEach(e => e.classList.remove('active'));
+  if (!isOpen) { exp.classList.add('open'); el.classList.add('active'); }
+}
+</script>
+</body>
+</html>
