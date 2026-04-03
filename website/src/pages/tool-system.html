@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Permission System — harness-decoded</title>
+<script src="../../js/site-base.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/lang-switch.css">
+<script type="module" src="../components/index.js"></script>
+<style>
+  :root {
+    --bg:#0a0a0f;--bg2:#11111a;--bg3:#1a1a28;
+    --border:rgba(120,120,200,0.12);--border2:rgba(120,120,200,0.25);
+    --text:#e2e2f0;--muted:#7070a0;
+    --purple:#8b5cf6;--teal:#2dd4bf;--amber:#f59e0b;
+    --coral:#f97316;--green:#34d399;--blue:#60a5fa;
+    --font-mono:'JetBrains Mono',monospace;--font-head:'Syne',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:14px;line-height:1.7;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+  .logo{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--text);text-decoration:none;}
+  .logo span{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;}
+  .back:hover{color:var(--purple);}
+  .wrap{max-width:980px;margin:0 auto;padding:0 2rem;}
+
+  /* hero */
+  .hero-wrap{padding:7rem 2rem 3rem;max-width:980px;margin:0 auto;}
+  .eyebrow{font-size:11px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase;margin-bottom:.9rem;}
+  h1{font-family:var(--font-head);font-size:clamp(2.4rem,5vw,4rem);font-weight:800;line-height:.95;letter-spacing:-.02em;margin-bottom:1.25rem;}
+  h1 em{color:var(--amber);font-style:normal;}
+  .hero-desc{color:var(--muted);max-width:560px;font-size:14px;line-height:1.9;margin-bottom:2rem;}
+  .metrics{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:3rem;}
+
+  /* permission flow diagram */
+  .flow-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 2rem;}
+  .section-label{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem;}
+  .section-title{font-family:var(--font-head);font-size:clamp(1.5rem,3vw,2rem);font-weight:800;margin-bottom:.75rem;}
+  .section-desc{color:var(--muted);font-size:13px;max-width:520px;margin-bottom:2.5rem;}
+
+  .flow-steps{display:flex;flex-direction:column;gap:2px;}
+  .flow-step{display:grid;grid-template-columns:32px 1fr;gap:1rem;align-items:start;}
+  .step-connector{display:flex;flex-direction:column;align-items:center;}
+  .step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:.75rem;}
+  .step-line{width:1px;flex:1;min-height:16px;background:var(--border2);}
+  .flow-card{border:1px solid var(--border);border-radius:8px;background:var(--bg3);padding:1rem 1.25rem;margin-bottom:4px;transition:border-color .2s;}
+  .flow-card:hover{border-color:var(--border2);}
+  .flow-card.pass{border-left:3px solid var(--green);}
+  .flow-card.check{border-left:3px solid var(--amber);}
+  .flow-card.exec{border-left:3px solid var(--blue);}
+  .flow-card.log{border-left:3px solid var(--purple);}
+  .flow-title{font-weight:500;font-size:13px;color:var(--text);margin-bottom:3px;}
+  .flow-sub{font-size:12px;color:var(--muted);}
+  .flow-code{margin-top:.75rem;background:var(--bg);border-radius:6px;padding:.75rem 1rem;font-size:11px;color:var(--muted);line-height:1.8;}
+  .flow-code .k{color:var(--purple);}
+  .flow-code .s{color:var(--green);}
+  .flow-code .f{color:var(--blue);}
+  .flow-code .c{color:#3a3a5a;font-style:italic;}
+
+  /* tools grid */
+  .tools-section{padding:4rem 2rem;}
+  .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:2rem;}
+
+  /* permission matrix */
+  .matrix-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 2rem;}
+  .matrix-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px;}
+  th{padding:.6rem 1rem;text-align:left;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
+  td{padding:.7rem 1rem;border-bottom:1px solid var(--border);color:var(--muted);}
+  td:first-child{color:var(--text);font-weight:500;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--bg3);}
+  .perm-yes{color:var(--green);}
+  .perm-no{color:var(--border2);}
+  .perm-maybe{color:var(--amber);}
+
+  /* undercover section */
+  .undercover-section{padding:4rem 2rem;}
+  .uc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:2rem;}
+  .uc-pane{background:var(--bg2);padding:1.5rem;}
+  .uc-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.75rem;}
+  .commit-line{font-size:12px;padding:.5rem .75rem;border-radius:5px;margin-bottom:4px;border:1px solid var(--border);}
+  .commit-bad{border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.05);color:#f87171;}
+  .commit-good{border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.05);color:var(--green);}
+  .commit-sha{color:var(--muted);font-size:10px;margin-right:.5rem;}
+
+  footer{border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;color:var(--muted);font-size:12px;}
+  footer a{color:var(--purple);text-decoration:none;}
+  @media(max-width:640px){.uc-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+  <a href="../../index.html" class="logo">harness<span>-decoded</span></a>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <span class="lang-switch" style="margin-right:.35rem;">
+      <button type="button" data-lang="en" aria-label="English">en</button>
+      <span class="lang-sep">/</span>
+      <button type="button" data-lang="zh" aria-label="简体中文">zh</button>
+    </span>
+    <a href="../../index.html" class="back" data-i18n="pages.toolSystem.back">← overview</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <p class="eyebrow">Tool System · Deep Dive</p>
+  <h1>29,000 lines<br>to run <em>bash safely</em></h1>
+  <p class="hero-desc">Every tool call passes through a seven-step gauntlet: lookup, schema validation, permission check, approval gate, sandboxed execution, error classification, and audit logging. None of these steps can be skipped.</p>
+  <div class="metrics">
+    <metric-badge label="Tools" value="40+" color="amber"></metric-badge>
+    <metric-badge label="Source" value="29K" sub="lines" color="amber"></metric-badge>
+    <metric-badge label="Permissions" value="9" sub="scopes" color="blue"></metric-badge>
+    <metric-badge label="Error kinds" value="7" color="teal"></metric-badge>
+  </div>
+</div>
+
+<!-- PERMISSION FLOW -->
+<div class="flow-section">
+  <div class="wrap">
+    <p class="section-label">Execution path</p>
+    <h2 class="section-title">Every tool call: 7 steps</h2>
+    <p class="section-desc">This is the single choke point that makes the harness safe. Each step can abort execution before the next begins.</p>
+
+    <div class="flow-steps">
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(96,165,250,.15);color:var(--blue);">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card check">
+          <div class="flow-title">Tool lookup</div>
+          <div class="flow-sub">Does this tool exist in the registry? Hard fail if not — the model hallucinated a tool name.</div>
+          <div class="flow-code"><span class="k">if</span> name <span class="k">not in</span> self._tools:<br>&nbsp;&nbsp;<span class="k">raise</span> <span class="f">KeyError</span>(<span class="s">f"Unknown tool: {name}"</span>)</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(245,158,11,.15);color:var(--amber);">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card check">
+          <div class="flow-title">Input schema validation</div>
+          <div class="flow-sub">Args validated against JSON Schema <em>before</em> the tool's execute() is called. The model cannot pass a malformed path to a file tool.</div>
+          <div class="flow-code"><span class="f">jsonschema.validate</span>(args, tool.input_schema)<br><span class="c"># raises ValidationError if args don't match</span></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(248,113,113,.15);color:#f87171;">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card check">
+          <div class="flow-title">Permission check</div>
+          <div class="flow-sub">tool.required_permissions must be a subset of session.permissions.granted. Missing permissions → PermissionError, surfaced to agent.</div>
+          <div class="flow-code">missing = required - granted<br><span class="k">if</span> missing:<br>&nbsp;&nbsp;<span class="k">raise</span> <span class="f">PermissionError</span>(<span class="s">f"Missing: {missing}"</span>)</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(249,115,22,.15);color:var(--coral);">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card check">
+          <div class="flow-title">Approval gate</div>
+          <div class="flow-sub">Destructive patterns (rm -rf, git push --force, DROP TABLE) trigger a pause. User sees the exact command and approves or denies before execution.</div>
+          <div class="flow-code"><span class="k">if</span> <span class="f">is_destructive</span>(args):<br>&nbsp;&nbsp;approval = <span class="k">await</span> <span class="f">request_approval</span>(tool, args)<br>&nbsp;&nbsp;<span class="k">if not</span> approval.granted: <span class="k">raise</span> PermissionError</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(52,211,153,.15);color:var(--green);">5</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card exec">
+          <div class="flow-title">Sandboxed execution</div>
+          <div class="flow-sub">Tool runs with: cwd restriction, env allowlist (no secrets leaked), hard timeout, output size cap. For shell: no shell=True, explicit env dict.</div>
+          <div class="flow-code">proc = <span class="k">await</span> asyncio.<span class="f">create_subprocess_shell</span>(<br>&nbsp;&nbsp;command, cwd=sandbox.cwd, env=allowed_env,<br>&nbsp;&nbsp;stdout=PIPE, stderr=STDOUT<br>)</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(139,92,246,.15);color:var(--purple);">6</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="flow-card pass">
+          <div class="flow-title">Error classification</div>
+          <div class="flow-sub">Not all errors are equal. RETRYABLE (connection drop) vs INPUT_INVALID (bad args) vs FATAL (corrupted state). Agent loop makes informed recovery decisions.</div>
+          <div class="flow-code"><span class="c"># RETRYABLE → try again</span><br><span class="c"># INPUT_INVALID → reformulate args</span><br><span class="c"># PERMISSION_DENIED → escalate or abandon</span><br><span class="c"># TIMEOUT → try simpler approach</span></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-connector">
+          <div class="step-circle" style="background:rgba(96,165,250,.15);color:var(--blue);">7</div>
+        </div>
+        <div class="flow-card log">
+          <div class="flow-title">Audit log entry</div>
+          <div class="flow-sub">Written before returning the result. Append-only JSONL. Includes: session_id, iteration, tool, full args, result summary, error kind, duration_ms, approval state.</div>
+          <div class="flow-code">audit.<span class="f">write</span>(<span class="f">AuditEntry</span>(<br>&nbsp;&nbsp;session_id, iteration, tool=name,<br>&nbsp;&nbsp;args=args, result_summary=output[:500],<br>&nbsp;&nbsp;duration_ms=elapsed, approved=approval<br>))</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOOLS GRID -->
+<div class="tools-section">
+  <div class="wrap">
+    <p class="section-label">Tool catalog</p>
+    <h2 class="section-title">40+ tools, six categories</h2>
+    <p class="section-desc">Each tool is a typed object, not a function decorator. Schema, permissions, and error handling are part of the type, not scattered across call sites.</p>
+
+    <div class="tools-grid">
+      <tool-card name="ReadFileTool" permission="FS_READ" risk="low" category="File System">
+        Reads file contents. Returns full text with UTF-8 decoding, replacing invalid bytes rather than crashing.
+      </tool-card>
+      <tool-card name="WriteFileTool" permission="FS_READ + FS_WRITE" risk="medium" category="File System">
+        Writes or overwrites a file. Creates parent directories automatically. Triggers approval if path is outside project root.
+      </tool-card>
+      <tool-card name="PatchFileTool" permission="FS_READ + FS_WRITE" risk="medium" category="File System">
+        Applies a unified diff to an existing file. Safer than WriteFile for partial edits — only changes the specified lines.
+      </tool-card>
+      <tool-card name="ListDirectoryTool" permission="FS_READ" risk="low" category="File System">
+        Lists files with optional glob filtering and recursive traversal. Hidden files and node_modules excluded by default.
+      </tool-card>
+      <tool-card name="GrepTool" permission="FS_READ" risk="low" category="File System">
+        Searches file contents with regex. Returns matching lines with context. More efficient than ReadFile + text search.
+      </tool-card>
+      <tool-card name="BashTool" permission="SHELL_EXEC" risk="high" category="Shell">
+        Executes shell commands in a sandboxed subprocess. Env allowlist prevents secret leakage. Destructive pattern detection triggers approval gate.
+      </tool-card>
+      <tool-card name="PythonTool" permission="SHELL_EXEC" risk="high" category="Shell">
+        Runs Python scripts inline. Uses the project's virtualenv if detected. Output limited to 500KB to prevent flooding.
+      </tool-card>
+      <tool-card name="WebFetchTool" permission="NET_FETCH" risk="medium" category="Network">
+        Fetches a URL and returns text content. New domains trigger approval on first access. Response size capped at 2MB.
+      </tool-card>
+      <tool-card name="WebSearchTool" permission="NET_SEARCH" risk="low" category="Network">
+        Queries a search API and returns structured results. Useful for documentation lookups without fetching full pages.
+      </tool-card>
+      <tool-card name="GitCommitTool" permission="GIT_WRITE" risk="medium" category="Git">
+        Creates a git commit. In Undercover Mode, scrubs internal codenames and suppresses AI attribution from the message.
+      </tool-card>
+      <tool-card name="GitDiffTool" permission="GIT_READ" risk="low" category="Git">
+        Returns git diff output. Used before write operations to understand current state and avoid duplicate changes.
+      </tool-card>
+      <tool-card name="SpawnSubagentTool" permission="AGENT_SPAWN" risk="medium" category="Agent">
+        Spawns a child agent with a scoped context and reduced permission set. Used by SwarmOrchestrator for dynamic task decomposition.
+      </tool-card>
+    </div>
+  </div>
+</div>
+
+<!-- PERMISSION MATRIX -->
+<div class="matrix-section">
+  <div class="wrap">
+    <p class="section-label">Permission matrix</p>
+    <h2 class="section-title">Which tools need what</h2>
+    <p class="section-desc">Permissions are declared, not inferred. This table is generated from tool definitions — it's always accurate.</p>
+    <div class="matrix-wrap" style="margin-top:2rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>FS_READ</th>
+            <th>FS_WRITE</th>
+            <th>SHELL_EXEC</th>
+            <th>NET_FETCH</th>
+            <th>GIT_WRITE</th>
+            <th>AGENT_SPAWN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ReadFileTool</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>WriteFileTool</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>PatchFileTool</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>ListDirectoryTool</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>BashTool</td><td class="perm-maybe">opt</td><td class="perm-maybe">opt</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>WebFetchTool</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td></tr>
+          <tr><td>GitCommitTool</td><td class="perm-yes">✓</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-yes">✓</td><td class="perm-no">–</td></tr>
+          <tr><td>SpawnSubagentTool</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-no">–</td><td class="perm-yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- UNDERCOVER MODE -->
+<div class="undercover-section">
+  <div class="wrap">
+    <p class="section-label">Undercover Mode</p>
+    <h2 class="section-title">Stealth commits for open-source</h2>
+    <p class="section-desc">When the agent detects a public repository, <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--teal);font-size:12px;">undercover.ts</code> activates and scrubs all git operations of internal information.</p>
+
+    <div class="uc-grid">
+      <div class="uc-pane">
+        <div class="uc-label" style="color:#f87171;">🚫 Blocked — internal leakage</div>
+        <div class="commit-line commit-bad"><span class="commit-sha">a1b2c3d</span>feat: use Capybara model for better reasoning</div>
+        <div class="commit-line commit-bad"><span class="commit-sha">e4f5g6h</span>fix: KAIROS autoDream not consolidating correctly</div>
+        <div class="commit-line commit-bad"><span class="commit-sha">i7j8k9l</span>chore: update to Anthropic internal API v2025-11</div>
+        <div class="commit-line commit-bad"><span class="commit-sha">m0n1o2p</span>Co-authored-by: Claude &lt;claude@anthropic.com&gt;</div>
+      </div>
+      <div class="uc-pane">
+        <div class="uc-label" style="color:var(--green);">✓ Allowed — clean for public repos</div>
+        <div class="commit-line commit-good"><span class="commit-sha">a1b2c3d</span>feat: improve response quality for complex reasoning</div>
+        <div class="commit-line commit-good"><span class="commit-sha">e4f5g6h</span>fix: memory consolidation not running on idle</div>
+        <div class="commit-line commit-good"><span class="commit-sha">i7j8k9l</span>chore: update API client version</div>
+        <div class="commit-line commit-good"><span class="commit-sha">m0n1o2p</span>docs: update README with new configuration options</div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <code-block lang="typescript" label="undercover.ts (reconstructed)">
+// Activated when operating in a public/open-source repository
+const BLOCKED_TERMS = [
+  "Capybara", "Tengu", "KAIROS", "autoDream",
+  "anthropic.com", "internal-api", "claude-code-internal"
+];
+
+function scrubCommitMessage(msg: string, context: UndercoverContext): string {
+  if (!context.isPublicRepo) return msg;
+
+  let scrubbed = msg;
+  for (const term of BLOCKED_TERMS) {
+    scrubbed = scrubbed.replaceAll(term, context.replacements[term] ?? "[redacted]");
+  }
+
+  // Strip AI attribution lines
+  scrubbed = scrubbed
+    .split("\n")
+    .filter(line => !line.startsWith("Co-authored-by: Claude"))
+    .join("\n");
+
+  return scrubbed;
+}
+
+function detectPublicRepo(cwd: string): boolean {
+  return (
+    hasOpenSourceLicense(cwd) ||
+    isPublicGitRemote(cwd) ||
+    hasContributingMd(cwd) ||
+    process.env.PUBLIC_REPO === "1"
+  );
+}
+      </code-block>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p data-i18n-html="true" data-i18n="pages.toolSystem.foot"><a href="../../index.html">harness-decoded</a> · <a href="../../../docs/03-tool-system.md">Tool system doc →</a> · <a href="../../principles.html">Principles →</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Lifecycle — harness-decoded</title>
+<script src="../../js/site-base.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/lang-switch.css">
+<style>
+  :root {
+    --bg:#0a0a0f;--bg2:#11111a;--bg3:#1a1a28;
+    --border:rgba(120,120,200,0.12);--border2:rgba(120,120,200,0.28);
+    --text:#e2e2f0;--muted:#7070a0;
+    --purple:#8b5cf6;--purple2:#a78bfa;
+    --teal:#2dd4bf;--amber:#f59e0b;--coral:#f97316;--green:#34d399;--blue:#60a5fa;
+    --font-mono:'JetBrains Mono',monospace;--font-head:'Syne',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:14px;line-height:1.7;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2rem;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+  .logo{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--text);text-decoration:none;}
+  .logo span{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;}
+  .back:hover{color:var(--purple);}
+
+  .hero{padding:7rem 2rem 3rem;max-width:900px;margin:0 auto;}
+  .eyebrow{font-size:11px;letter-spacing:.2em;color:var(--blue);text-transform:uppercase;margin-bottom:.9rem;}
+  h1{font-family:var(--font-head);font-size:clamp(2.4rem,5vw,4rem);font-weight:800;line-height:.95;letter-spacing:-.02em;margin-bottom:1.25rem;}
+  h1 em{color:var(--blue);font-style:normal;}
+  .hero-desc{color:var(--muted);max-width:560px;font-size:14px;line-height:1.9;margin-bottom:2rem;}
+
+  /* stepper */
+  .stepper{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 0;}
+  .stepper-inner{max-width:900px;margin:0 auto;padding:0 2rem;}
+  .progress-bar{display:flex;gap:4px;margin-bottom:2.5rem;flex-wrap:wrap;}
+  .prog-dot{height:3px;flex:1;border-radius:2px;background:var(--border2);transition:background .3s;cursor:pointer;min-width:24px;}
+  .prog-dot.done{background:var(--blue);}
+  .prog-dot.active{background:var(--purple);}
+
+  .step-panel{display:none;}
+  .step-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+  @media(max-width:640px){.step-panel.active{grid-template-columns:1fr;}}
+
+  .step-left{}
+  .step-num{font-family:var(--font-head);font-size:3.5rem;font-weight:800;color:var(--border2);line-height:1;margin-bottom:.5rem;}
+  .step-layer{font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem;}
+  .step-title{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:.75rem;line-height:1.2;}
+  .step-desc{font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:1.25rem;}
+  .step-callout{border-left:3px solid;padding:.75rem 1rem;border-radius:0 6px 6px 0;font-size:12px;color:var(--muted);line-height:1.8;background:rgba(255,255,255,.02);}
+
+  .step-right{}
+  .step-code-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+  .code-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1.1rem;font-size:11px;line-height:1.8;color:var(--muted);overflow-x:auto;}
+  .kw{color:var(--purple2);}
+  .fn{color:var(--blue);}
+  .st{color:var(--green);}
+  .cm{color:#3a3a5a;font-style:italic;}
+  .hl{color:var(--text);}
+  .num{color:var(--amber);}
+
+  .state-box{margin-top:1rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .state-header{padding:.5rem .9rem;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);color:var(--muted);}
+  .state-row{display:flex;justify-content:space-between;padding:.45rem .9rem;font-size:11px;border-bottom:1px solid var(--border);}
+  .state-row:last-child{border-bottom:none;}
+  .state-key{color:var(--muted);}
+  .state-val{color:var(--text);text-align:right;}
+  .state-val.changing{color:var(--amber);}
+  .state-val.new{color:var(--green);}
+
+  .nav-controls{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:2.5rem;}
+  .ctrl-btn{padding:.6rem 1.4rem;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:var(--font-mono);font-size:12px;cursor:pointer;transition:all .15s;}
+  .ctrl-btn:hover{border-color:var(--purple);color:var(--purple2);}
+  .ctrl-btn:disabled{opacity:.3;cursor:default;}
+  .ctrl-btn.primary{background:var(--purple);border-color:var(--purple);color:#fff;}
+  .ctrl-btn.primary:hover{background:var(--purple2);}
+  .step-counter{font-size:12px;color:var(--muted);min-width:80px;text-align:center;}
+
+  /* token tracker */
+  .tracker-section{max-width:900px;margin:0 auto;padding:4rem 2rem;}
+  .section-label{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem;}
+  .section-title{font-family:var(--font-head);font-size:clamp(1.5rem,3vw,2rem);font-weight:800;margin-bottom:.75rem;}
+  .token-rows{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:2rem;}
+  .token-row{display:grid;grid-template-columns:180px 1fr 100px;align-items:center;gap:1rem;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);}
+  .token-row:last-child{border-bottom:none;}
+  .token-row:hover{background:var(--bg2);}
+  .token-event{font-size:12px;color:var(--text);}
+  .token-bar-wrap{background:var(--bg3);border-radius:3px;height:6px;overflow:hidden;}
+  .token-bar{height:100%;border-radius:3px;transition:width .3s;}
+  .token-count{font-size:11px;color:var(--muted);text-align:right;}
+
+  footer{border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;color:var(--muted);font-size:12px;}
+  footer a{color:var(--purple);text-decoration:none;}
+</style>
+</head>
+<body>
+<nav style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+  <a href="../../index.html" class="logo">harness<span>-decoded</span></a>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <span class="lang-switch" style="margin-right:.35rem;">
+      <button type="button" data-lang="en" aria-label="English">en</button>
+      <span class="lang-sep">/</span>
+      <button type="button" data-lang="zh" aria-label="简体中文">zh</button>
+    </span>
+    <a href="../../index.html" class="back" data-i18n="pages.requestLifecycle.back">← overview</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <p class="eyebrow">Request Lifecycle · Interactive</p>
+  <h1>One message.<br><em>Eight layers</em>.</h1>
+  <p class="hero-desc">Step through a single agent request frame by frame. See exactly which layer handles what, what state changes, and what tokens accumulate at each step.</p>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="stepper-inner">
+    <div class="progress-bar" id="prog-bar"></div>
+    <div id="steps-container"></div>
+    <div class="nav-controls">
+      <button class="ctrl-btn" id="btn-prev" onclick="step(-1)" disabled>← prev</button>
+      <span class="step-counter" id="step-counter">1 / 8</span>
+      <button class="ctrl-btn primary" id="btn-next" onclick="step(1)">next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOKEN TRACKER -->
+<div class="tracker-section">
+  <p class="section-label">Token accumulation</p>
+  <h2 class="section-title">Where the tokens go</h2>
+  <p class="section-desc">A typical 10-iteration session. Each LLM call includes the full context — token cost compounds. This is why compaction matters.</p>
+  <div class="token-rows">
+    <div class="token-row">
+      <div class="token-event">System prompt</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:3%;background:var(--purple)"></div></div>
+      <div class="token-count">~2,000 tok</div>
+    </div>
+    <div class="token-row">
+      <div class="token-event">Memory prefix (KAIROS)</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:6%;background:var(--teal)"></div></div>
+      <div class="token-count">~3,800 tok</div>
+    </div>
+    <div class="token-row">
+      <div class="token-event">User task</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:1%;background:var(--blue)"></div></div>
+      <div class="token-count">~150 tok</div>
+    </div>
+    <div class="token-row">
+      <div class="token-event">10× tool calls + results</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:32%;background:var(--amber)"></div></div>
+      <div class="token-count">~18,000 tok</div>
+    </div>
+    <div class="token-row">
+      <div class="token-event">10× LLM responses</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:14%;background:var(--coral)"></div></div>
+      <div class="token-count">~8,000 tok</div>
+    </div>
+    <div class="token-row" style="background:var(--bg2);">
+      <div class="token-event" style="font-weight:500;color:var(--text);">Total (no compaction)</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:56%;background:var(--green)"></div></div>
+      <div class="token-count" style="color:var(--green);">~31,950 tok</div>
+    </div>
+    <div class="token-row" style="background:rgba(45,212,191,.04);">
+      <div class="token-event" style="color:var(--teal);">After autoCompact</div>
+      <div class="token-bar-wrap"><div class="token-bar" style="width:12%;background:var(--teal)"></div></div>
+      <div class="token-count" style="color:var(--teal);">~6,500 tok  (-80%)</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p data-i18n-html="true" data-i18n="pages.requestLifecycle.foot"><a href="../../index.html">harness-decoded</a> · <a href="../../../docs/01-architecture.md">Architecture →</a> · <a href="../../principles.html">Animations →</a></p>
+</footer>
+
+<script src="../../js/i18n.js"></script>
+<script>
+const STEPS = [
+  {
+    num: "01", layer: "IDE Bridge", layerColor: "#f97316",
+    title: "User input received",
+    desc: "The IDE extension or terminal UI captures the user's message, active file context, cursor position, and any selected text. This is serialized into a structured TaskObject — not a raw string.",
+    callout: "The bridge is intentionally thin. It serializes intent but makes zero AI decisions. This is why the harness is testable headlessly — the bridge can be replaced with a test fixture.",
+    calloutColor: "#f97316",
+    code: `<span class="cm"># IDE Bridge: serialize user intent</span>
+task = <span class="fn">TaskObject</span>(
+  prompt=<span class="st">"refactor auth module to use RS256"</span>,
+  active_file=<span class="st">"src/auth.py"</span>,
+  cursor_line=<span class="num">42</span>,
+  selection=<span class="hl">None</span>,
+  workspace_root=Path(<span class="st">"/home/user/myproject"</span>),
+)`,
+    state: [
+      {k:"session_id", v:"abc123", cls:"new"},
+      {k:"iteration", v:"0", cls:""},
+      {k:"messages", v:"0", cls:""},
+      {k:"tokens (est)", v:"0", cls:""},
+    ]
+  },
+  {
+    num: "02", layer: "Multi-Agent Orchestrator", layerColor: "#8b5cf6",
+    title: "Task decomposition",
+    desc: "The orchestrator estimates task complexity. Simple tasks route to a single agent. Tasks exceeding ~15 estimated iterations trigger fan-out or swarm strategies.",
+    callout: "Complexity estimation uses heuristics: task length, number of files mentioned, presence of words like 'all', 'every', 'entire'. False positives are cheap — single-agent fallback is always available.",
+    calloutColor: "#8b5cf6",
+    code: `<span class="kw">if</span> orchestrator.<span class="fn">estimate_complexity</span>(task) > <span class="num">15</span>:
+    subtasks = orchestrator.<span class="fn">decompose</span>(task)
+    <span class="cm"># fan-out: spawn parallel subagents</span>
+    results = <span class="kw">await</span> <span class="fn">parallel_fan_out</span>(
+        subtasks, harness_factory,
+        max_concurrency=<span class="num">4</span>
+    )
+<span class="kw">else</span>:
+    <span class="cm"># single agent handles it</span>
+    result = <span class="kw">await</span> harness.<span class="fn">run</span>(task)`,
+    state: [
+      {k:"session_id", v:"abc123", cls:""},
+      {k:"strategy", v:"single-agent", cls:"new"},
+      {k:"estimated iters", v:"~8", cls:"new"},
+      {k:"tokens (est)", v:"0", cls:""},
+    ]
+  },
+  {
+    num: "03", layer: "Memory System", layerColor: "#2dd4bf",
+    title: "Context loaded from KAIROS",
+    desc: "The memory system reads the consolidated memory store from the previous KAIROS run. Known facts, patterns, and open questions are injected as a context prefix. The agent starts informed, not blank.",
+    callout: "On a mature project with 50+ sessions of KAIROS history, the memory prefix can save dozens of tool calls per session. The agent already knows which files change frequently, which tests are flaky, which APIs have gotchas.",
+    calloutColor: "#2dd4bf",
+    code: `memory = <span class="fn">MemorySystem</span>.<span class="fn">load</span>(
+  project_dir / <span class="st">".harness/memory.json"</span>
+)
+<span class="cm"># Injects consolidated knowledge as context prefix</span>
+prefix = memory.<span class="fn">to_context_string</span>()
+messages = [
+  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prefix},
+  {<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: <span class="st">"Noted."</span>},
+  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: task.prompt},
+]`,
+    state: [
+      {k:"session_id", v:"abc123", cls:""},
+      {k:"messages", v:"3", cls:"changing"},
+      {k:"memory facts", v:"12", cls:"new"},
+      {k:"tokens (est)", v:"~4,200", cls:"changing"},
+    ]
+  },
+  {
+    num: "04", layer: "Query Engine", layerColor: "#60a5fa",
+    title: "LLM call with streaming",
+    desc: "The query engine sends the messages and tool definitions to the Anthropic API. Response streams token-by-token. Tool call arguments are assembled incrementally. Token usage is tracked against the session budget.",
+    callout: "The Query Engine is 46K lines. Streaming pipeline, backpressure, retry logic for 429/529/500/503, token accounting, response caching, model routing. 'Just calling an API' has a lot of surface area.",
+    calloutColor: "#60a5fa",
+    code: `<span class="cm"># QueryEngine.call() — with retry</span>
+<span class="kw">for</span> attempt <span class="kw">in</span> range(<span class="num">5</span>):
+    <span class="kw">try</span>:
+        response = <span class="kw">await</span> client.messages.<span class="fn">create</span>(
+            model=<span class="st">"claude-opus-4-6"</span>,
+            messages=messages, tools=tools,
+            max_tokens=<span class="num">4096</span>
+        )
+        trace.total_input_tokens += response.usage.input_tokens
+        <span class="kw">return</span> response
+    <span class="kw">except</span> RateLimitError:
+        <span class="kw">await</span> asyncio.<span class="fn">sleep</span>(<span class="num">2</span> ** attempt * jitter)`,
+    state: [
+      {k:"iteration", v:"1", cls:"changing"},
+      {k:"stop_reason", v:"tool_use", cls:"new"},
+      {k:"input tokens", v:"+2,341", cls:"changing"},
+      {k:"output tokens", v:"+612", cls:"changing"},
+    ]
+  },
+  {
+    num: "05", layer: "Tool System", layerColor: "#f59e0b",
+    title: "Tool call execution",
+    desc: "The agent decided to call read_file. The tool system runs the 7-step gauntlet: lookup → schema validation → permission check → approval gate → sandboxed execution → error classification → audit log.",
+    callout: "This step can repeat many times within a single iteration if the model requests multiple tool calls. Each tool call is independent — failure of one does not abort the others.",
+    calloutColor: "#f59e0b",
+    code: `<span class="kw">for</span> block <span class="kw">in</span> response.content:
+    <span class="kw">if</span> block.type != <span class="st">"tool_use"</span>: <span class="kw">continue</span>
+
+    tool = registry.<span class="fn">get</span>(block.name)
+    <span class="cm"># 7-step gauntlet runs here</span>
+    result = <span class="kw">await</span> tool.<span class="fn">execute</span>(
+        block.input,
+        permissions=session.permissions,
+        audit=audit_log,
+        session_id=trace.session_id,
+    )
+    tool_results.<span class="fn">append</span>(result)`,
+    state: [
+      {k:"tool", v:"read_file", cls:"new"},
+      {k:"duration", v:"12ms", cls:"new"},
+      {k:"permission", v:"FS_READ ✓", cls:"new"},
+      {k:"audit entries", v:"1", cls:"changing"},
+    ]
+  },
+  {
+    num: "06", layer: "Memory System", layerColor: "#2dd4bf",
+    title: "Compaction threshold check",
+    desc: "After each iteration, the memory system estimates the current token count. If it exceeds 85% of the context window, autoCompact triggers: checkpoint raw messages → LLM-powered summarization → replace with summary.",
+    callout: "The MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3 guard is critical. Before this was added, 1,279 sessions/day burned ~250K API calls in a compaction failure loop.",
+    calloutColor: "#2dd4bf",
+    code: `messages = <span class="kw">await</span> memory.<span class="fn">maybe_compact</span>(messages)
+
+<span class="cm"># Inside maybe_compact:</span>
+<span class="kw">if</span> estimated_tokens > context_limit * <span class="num">0.85</span>:
+    <span class="kw">if</span> self._failures >= MAX_CONSECUTIVE_FAILURES:
+        <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="st">"autoCompact gave up"</span>)
+    self.<span class="fn">_checkpoint</span>(messages)    <span class="cm"># save raw to disk</span>
+    summary = <span class="kw">await</span> self.<span class="fn">_compact</span>(messages)
+    <span class="kw">return</span> [summary_message]      <span class="cm"># replace history</span>`,
+    state: [
+      {k:"tokens (est)", v:"~18,400", cls:""},
+      {k:"threshold", v:"153,000", cls:""},
+      {k:"compaction", v:"not triggered", cls:""},
+      {k:"consecutive fails", v:"0", cls:""},
+    ]
+  },
+  {
+    num: "07", layer: "Agent Loop", layerColor: "#8b5cf6",
+    title: "Iterate until complete",
+    desc: "Steps 4–6 repeat until the model returns stop_reason='end_turn' (task complete) or max_iterations is reached. Approval gates pause the loop when destructive operations are detected.",
+    callout: "The max_iterations guard (default: 50) is not just a safety feature — it's load management. Without it, a confused agent burns API budget indefinitely. The error message is surfaced to the user, not swallowed.",
+    calloutColor: "#8b5cf6",
+    code: `<span class="kw">while</span> trace.iterations < self.max_iterations:
+    trace.iterations += <span class="num">1</span>
+
+    response = <span class="kw">await</span> qe.<span class="fn">call</span>(messages, ...)
+
+    <span class="kw">if</span> response.stop_reason == <span class="st">"end_turn"</span>:
+        <span class="kw">return</span> <span class="fn">extract_text</span>(response), trace
+
+    <span class="cm"># execute tools, update messages, check compaction</span>
+    ...
+
+<span class="cm"># Reached only on iteration limit</span>
+<span class="kw">return</span> <span class="st">"[max iterations reached]"</span>, trace`,
+    state: [
+      {k:"iteration", v:"1 → 7", cls:"changing"},
+      {k:"tool calls", v:"14 total", cls:"changing"},
+      {k:"tokens used", v:"~28,400", cls:"changing"},
+      {k:"compactions", v:"0", cls:""},
+    ]
+  },
+  {
+    num: "08", layer: "IDE Bridge", layerColor: "#f97316",
+    title: "Result surfaces to IDE",
+    desc: "The final response is sent back through the IDE Bridge. Diffs are shown for preview before any file writes are applied. The KAIROS daemon is queued to consolidate the session transcript on next idle.",
+    callout: "KAIROS is queued, not awaited. The user gets their result immediately. KAIROS runs in a forked subprocess after the session ends — it can fail completely without affecting the user experience.",
+    calloutColor: "#f97316",
+    code: `<span class="cm"># Session complete — surface result</span>
+bridge.<span class="fn">show_result</span>(final_text)
+
+<span class="cm"># Queue KAIROS (forked, non-blocking)</span>
+asyncio.create_subprocess_exec(
+    sys.executable, <span class="st">"-m"</span>, <span class="st">"harness.kairos"</span>,
+    str(session_dir),
+    <span class="cm"># exits independently — no await</span>
+)
+
+trace.<span class="fn">summary</span>()
+<span class="cm"># iterations: 7, tokens: 28,400</span>
+<span class="cm"># tool calls: 14, cost: $0.043</span>`,
+    state: [
+      {k:"status", v:"complete", cls:"new"},
+      {k:"total iterations", v:"7", cls:""},
+      {k:"total tokens", v:"28,400", cls:""},
+      {k:"est. cost", v:"$0.043", cls:""},
+    ]
+  },
+];
+
+let current = 0;
+
+function render() {
+  const container = document.getElementById('steps-container');
+  const progBar = document.getElementById('prog-bar');
+  const counter = document.getElementById('step-counter');
+
+  container.innerHTML = '';
+  progBar.innerHTML = '';
+
+  STEPS.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot' + (i < current ? ' done' : i === current ? ' active' : '');
+    dot.onclick = () => { current = i; render(); };
+    progBar.appendChild(dot);
+  });
+
+  const s = STEPS[current];
+  const panel = document.createElement('div');
+  panel.className = 'step-panel active';
+  panel.innerHTML = `
+    <div class="step-left">
+      <div class="step-num" style="color:${s.layerColor}33">${s.num}</div>
+      <div class="step-layer" style="color:${s.layerColor}">${s.layer}</div>
+      <div class="step-title">${s.title}</div>
+      <div class="step-desc">${s.desc}</div>
+      <div class="step-callout" style="border-color:${s.layerColor}55;background:${s.layerColor}06">
+        ${s.callout}
+      </div>
+    </div>
+    <div class="step-right">
+      <div class="step-code-label">Code</div>
+      <div class="code-box"><code>${s.code}</code></div>
+      <div class="state-box">
+        <div class="state-header">State snapshot</div>
+        ${s.state.map(r => `
+          <div class="state-row">
+            <span class="state-key">${r.k}</span>
+            <span class="state-val ${r.cls}">${r.v}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.appendChild(panel);
+
+  counter.textContent = `${current + 1} / ${STEPS.length}`;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === STEPS.length - 1;
+}
+
+function step(dir) {
+  current = Math.max(0, Math.min(STEPS.length - 1, current + dir));
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

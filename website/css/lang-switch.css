@@ -1,0 +1,39 @@
+/* Text-only en/zh — no box, minimal impact on nav layout */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lang-switch button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted, #7070a0);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: inherit;
+}
+.lang-switch button:hover {
+  color: var(--purple2, #a78bfa);
+}
+.lang-switch button[aria-current="true"] {
+  color: var(--text, #e2e2f0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.lang-switch .lang-sep {
+  color: var(--muted, #7070a0);
+  user-select: none;
+  font-size: 12px;
+}
+/* Optional: match 13px nav links on main site */
+.lang-switch.lang-switch--md button,
+.lang-switch.lang-switch--md .lang-sep {
+  font-size: 13px;
+}

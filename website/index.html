@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>harness-decoded — Claude Code Architecture</title>
+<title data-i18n="meta.title">harness-decoded — Claude Code Architecture</title>
+<script src="js/site-base.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lang-switch.css">
 <style>
   :root {
     --bg:       #0a0a0f;
@@ -525,33 +527,43 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">harness<span>-decoded</span></a>
+  <a href="index.html" class="nav-logo">harness<span>-decoded</span></a>
   <ul class="nav-links">
-    <li><a href="#architecture">Architecture</a></li>
-    <li><a href="#lifecycle">Lifecycle</a></li>
-    <li><a href="#findings">Findings</a></li>
-    <li><a href="#code">Code</a></li>
-    <li><a href="https://github.com/YOUR_USERNAME/harness-decoded" target="_blank">GitHub ↗</a></li>
+    <li class="lang-switch lang-switch--md">
+      <button type="button" data-lang="en" aria-label="English">en</button>
+      <span class="lang-sep">/</span>
+      <button type="button" data-lang="zh" aria-label="简体中文">zh</button>
+    </li>
+    <li><a href="principles.html" data-i18n="nav.principles">Principles</a></li>
+    <li><a href="compaction.html" data-i18n="nav.compaction">Compaction</a></li>
+    <li><a href="src/pages/request-lifecycle.html" data-i18n="nav.lifecycle">Lifecycle+</a></li>
+    <li><a href="src/pages/tool-system.html" data-i18n="nav.tools">Tools</a></li>
+    <li><a href="src/pages/multi-agent.html" data-i18n="nav.multiagent">Multi-agent</a></li>
+    <li><a href="#architecture" data-i18n="nav.arch">Architecture</a></li>
+    <li><a href="kairos.html">KAIROS</a></li>
+    <li><a href="playground.html" data-i18n="nav.playground">Playground</a></li>
+    <li><a href="https://github.com/seanyoungw/harness-decoded" data-repo target="_blank" rel="noopener">GitHub ↗</a></li>
   </ul>
 </nav>
 
 <!-- HERO -->
 <div class="hero" style="padding-top:6rem;">
   <div class="hero-glow"></div>
-  <p class="eyebrow">Claude Code Architecture · Decoded</p>
-  <h1>The <span>harness</span><br>not the model</h1>
-  <p class="hero-sub">
+  <p class="eyebrow" data-i18n="hero.eyebrow">Claude Code Architecture · Decoded</p>
+  <h1 data-i18n-html="true" data-i18n="hero.h1">The <span>harness</span><br>not the model</h1>
+  <p class="hero-sub" data-i18n-html="true" data-i18n="hero.sub">
     The March 2026 source leak revealed something profound:
     <strong>Claude Code's innovation isn't the AI — it's the execution framework around it.</strong>
     512,000 lines. 40+ tools. A memory daemon. A stealth commit mode.
     This is the architecture, decoded.
   </p>
   <div class="hero-actions">
-    <a href="#architecture" class="btn btn-primary">Explore Architecture</a>
-    <a href="https://github.com/YOUR_USERNAME/harness-decoded" class="btn btn-ghost" target="_blank">View on GitHub</a>
+    <a href="#architecture" class="btn btn-primary" data-i18n="hero.btnExplore">Explore Architecture</a>
+    <a href="principles.html" class="btn btn-ghost" data-i18n="hero.btnAnim">Animated principles →</a>
+    <a href="https://github.com/seanyoungw/harness-decoded" class="btn btn-ghost" data-repo target="_blank" rel="noopener" data-i18n="hero.btnGh">View on GitHub</a>
   </div>
   <div class="scroll-hint">
-    <span>SCROLL</span>
+    <span data-i18n="hero.scroll">SCROLL</span>
     <div class="scroll-line"></div>
   </div>
 </div>
@@ -561,9 +573,9 @@
 <!-- HARNESS DIAGRAM -->
 <div class="diagram-section" id="architecture">
   <div class="diagram-inner">
-    <p class="section-label">Core Architecture</p>
-    <h2 class="section-title">The Harness: Five Layers</h2>
-    <p class="section-desc">Click any layer to expand its internals. The model sits below all five — it's one component, not the system.</p>
+    <p class="section-label" data-i18n="arch.label">Core Architecture</p>
+    <h2 class="section-title" data-i18n="arch.title">The Harness: Five Layers</h2>
+    <p class="section-desc" data-i18n="arch.desc">Click any layer to expand its internals. The model sits below all five — it's one component, not the system.</p>
 
     <div class="harness-stack">
 
@@ -571,11 +583,11 @@
       <div class="harness-layer" onclick="toggleLayer(this)">
         <div class="layer-accent" style="background:var(--amber)"></div>
         <div class="layer-body">
-          <div class="layer-name">Tool System</div>
-          <div class="layer-desc">40+ tools · permission-gated · sandboxed execution · typed I/O</div>
-          <div class="layer-stat" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">~29K lines</div>
+          <div class="layer-name" data-i18n="layer.tools.name">Tool System</div>
+          <div class="layer-desc" data-i18n="layer.tools.desc">40+ tools · permission-gated · sandboxed execution · typed I/O</div>
+          <div class="layer-stat" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)" data-i18n="layer.tools.stat">~29K lines</div>
         </div>
-        <div class="layer-detail">
+        <div class="layer-detail" data-i18n-html="true" data-i18n="layer.tools.detail">
           The largest conceptual surface in the harness. Each tool is not just a function — it's a typed, validated, permission-gated unit with its own error taxonomy. Before any tool executes, the harness checks <code>requiredPermissions</code> against the session's <code>PermissionSet</code>. Tools that write files require <code>FS_WRITE</code>; shell execution requires <code>SHELL_EXEC</code> (denied by default). The <code>undercover.ts</code> tool context flag suppresses AI attribution in git commits when operating in public repos. Notable tools: <code>bash</code>, <code>read_file</code>, <code>patch_file</code>, <code>web_fetch</code>, <code>spawn_subagent</code>, <code>ask_user</code>.
         </div>
       </div>
@@ -584,11 +596,11 @@
       <div class="harness-layer" onclick="toggleLayer(this)">
         <div class="layer-accent" style="background:var(--blue)"></div>
         <div class="layer-body">
-          <div class="layer-name">Query Engine</div>
-          <div class="layer-desc">streaming · backpressure · retry logic · token accounting · response caching</div>
-          <div class="layer-stat" style="background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)">~46K lines</div>
+          <div class="layer-name" data-i18n="layer.query.name">Query Engine</div>
+          <div class="layer-desc" data-i18n="layer.query.desc">streaming · backpressure · retry logic · token accounting · response caching</div>
+          <div class="layer-stat" style="background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)" data-i18n="layer.query.stat">~46K lines</div>
         </div>
-        <div class="layer-detail">
+        <div class="layer-detail" data-i18n-html="true" data-i18n="layer.query.detail">
           The largest single module in the codebase at ~46K lines — which tells you how much complexity lives in "just calling an API." The engine handles streaming responses token-by-token, building tool call structures incrementally. Retry logic distinguishes retryable errors (429, 529, 500, 503) from fatal ones (400, 401). Exponential backoff with jitter on rate limits. Context-length errors trigger compaction and a single retry. Response caching deduplicates identical tool-observation sequences across subagents. Token accounting tracks per-call and per-session costs with configurable budget limits.
         </div>
       </div>
@@ -597,11 +609,11 @@
       <div class="harness-layer" onclick="toggleLayer(this)">
         <div class="layer-accent" style="background:var(--teal)"></div>
         <div class="layer-body">
-          <div class="layer-name">Memory System</div>
-          <div class="layer-desc">autoCompact · KAIROS daemon · autoDream consolidation · checkpointing</div>
+          <div class="layer-name" data-i18n="layer.mem.name">Memory System</div>
+          <div class="layer-desc" data-i18n="layer.mem.desc">autoCompact · KAIROS daemon · autoDream consolidation · checkpointing</div>
           <div class="layer-stat" style="background:rgba(45,212,191,0.1);color:var(--teal);border:1px solid rgba(45,212,191,0.2)">KAIROS</div>
         </div>
-        <div class="layer-detail">
+        <div class="layer-detail" data-i18n-html="true" data-i18n="layer.mem.detail">
           Three subsystems. <code>autoCompact</code> triggers at ~85% context capacity, summarizing history while preserving task spec, constraints, and progress. <code>KAIROS</code> is a daemon that runs in a <em>forked subprocess</em> while the user is idle — the fork isolation ensures it cannot corrupt the live agent context. <code>autoDream</code> runs inside KAIROS: reads all session transcripts, merges overlapping observations, resolves contradictions (newer wins), converts tentative notes to durable facts. The result is checkpointed and loaded at next session start. A leaked internal metric: 1,279 sessions/day were burning ~250K API calls on consecutive compaction failures before the <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code> fix.
         </div>
       </div>
@@ -610,11 +622,11 @@
       <div class="harness-layer" onclick="toggleLayer(this)">
         <div class="layer-accent" style="background:var(--purple)"></div>
         <div class="layer-body">
-          <div class="layer-name">Multi-Agent Orchestrator</div>
-          <div class="layer-desc">task decomposition · subagent spawning · fan-out patterns · result aggregation</div>
+          <div class="layer-name" data-i18n="layer.multi.name">Multi-Agent Orchestrator</div>
+          <div class="layer-desc" data-i18n="layer.multi.desc">task decomposition · subagent spawning · fan-out patterns · result aggregation</div>
           <div class="layer-stat" style="background:rgba(139,92,246,0.1);color:var(--purple2);border:1px solid rgba(139,92,246,0.2)">swarm</div>
         </div>
-        <div class="layer-detail">
+        <div class="layer-detail" data-i18n-html="true" data-i18n="layer.multi.detail">
           Three coordination patterns. <strong>Sequential</strong>: default, subagents run one at a time. <strong>Parallel fan-out</strong>: independent subtasks spawn concurrently, results gathered at a barrier. <strong>Swarm</strong>: subagents dynamically spawn further subagents as they discover complexity; the orchestrator receives async reports. Each subagent receives a scoped context — task-specific, not the full session history — reducing token costs and preventing information bleed between independent subtasks. Subagent failure policies: retry, skip, or abort propagation configurable per spawn.
         </div>
       </div>
@@ -623,11 +635,11 @@
       <div class="harness-layer" onclick="toggleLayer(this)">
         <div class="layer-accent" style="background:var(--coral)"></div>
         <div class="layer-body">
-          <div class="layer-name">IDE Bridge</div>
-          <div class="layer-desc">terminal UI (Ink) · VSCode extension · JetBrains plugin · approval protocol</div>
-          <div class="layer-stat" style="background:rgba(249,115,22,0.1);color:var(--coral);border:1px solid rgba(249,115,22,0.2)">bidirectional</div>
+          <div class="layer-name" data-i18n="layer.ide.name">IDE Bridge</div>
+          <div class="layer-desc" data-i18n="layer.ide.desc">terminal UI (Ink) · VSCode extension · JetBrains plugin · approval protocol</div>
+          <div class="layer-stat" style="background:rgba(249,115,22,0.1);color:var(--coral);border:1px solid rgba(249,115,22,0.2)" data-i18n="layer.ide.stat">bidirectional</div>
         </div>
-        <div class="layer-detail">
+        <div class="layer-detail" data-i18n-html="true" data-i18n="layer.ide.detail">
           Three implementations, one protocol. The terminal UI uses <code>Ink</code> (React for terminals), explaining why Claude Code's output renders as a structured UI rather than scrolling text. VSCode and JetBrains extensions communicate over a local socket. The bridge sends: file contents, cursor position, selection, active diagnostics. It receives: diffs for preview, approval requests for destructive operations, agent status. The bridge is deliberately thin — it serializes intent, but makes no AI decisions. This separation means the harness is testable headlessly.
         </div>
       </div>
@@ -637,7 +649,7 @@
     <!-- Model at bottom -->
     <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:3px;padding:1rem;border:1px dashed var(--border2);border-radius:8px;color:var(--muted);font-size:13px;">
       <span style="color:var(--purple2);">◆</span>
-      <span>Claude Model (Anthropic API) — <em>one component among five, not the system</em></span>
+      <span data-i18n-html="true" data-i18n="arch.modelFoot">Claude Model (Anthropic API) — <em>one component among five, not the system</em></span>
       <span style="color:var(--purple2);">◆</span>
     </div>
   </div>
@@ -645,17 +657,17 @@
 
 <!-- LIFECYCLE -->
 <section class="lifecycle-section" id="lifecycle">
-  <p class="section-label">Request Lifecycle</p>
-  <h2 class="section-title">What happens when you<br>send a message</h2>
-  <p class="section-desc">A single agent request passes through every layer. Click each step to see what's happening inside.</p>
+  <p class="section-label" data-i18n="life.label">Request Lifecycle</p>
+  <h2 class="section-title" data-i18n-html="true" data-i18n="life.title">What happens when you<br>send a message</h2>
+  <p class="section-desc" data-i18n="life.desc">A single agent request passes through every layer. Click each step to see what's happening inside.</p>
 
   <div class="lifecycle-steps">
 
     <div class="lifecycle-step active" onclick="selectStep(this)">
       <div class="step-num">01</div>
       <div class="step-content">
-        <div class="step-name">IDE Bridge receives task</div>
-        <div class="step-detail">Serializes user input, active file, cursor position → structured TaskObject</div>
+        <div class="step-name" data-i18n="life.s1n">IDE Bridge receives task</div>
+        <div class="step-detail" data-i18n="life.s1d">Serializes user input, active file, cursor position → structured TaskObject</div>
       </div>
       <div class="step-tag" style="color:var(--coral);border-color:rgba(249,115,22,0.3)">IDE Bridge</div>
     </div>
@@ -663,8 +675,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">02</div>
       <div class="step-content">
-        <div class="step-name">Orchestrator decomposes</div>
-        <div class="step-detail">Decides: single agent or multi-agent fan-out? Allocates context budget per subagent.</div>
+        <div class="step-name" data-i18n="life.s2n">Orchestrator decomposes</div>
+        <div class="step-detail" data-i18n="life.s2d">Decides: single agent or multi-agent fan-out? Allocates context budget per subagent.</div>
       </div>
       <div class="step-tag" style="color:var(--purple2);border-color:rgba(139,92,246,0.3)">Orchestrator</div>
     </div>
@@ -672,8 +684,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">03</div>
       <div class="step-content">
-        <div class="step-name">Memory System loads context</div>
-        <div class="step-detail">Injects session summary from last autoDream consolidation. Attaches project-level notes.</div>
+        <div class="step-name" data-i18n="life.s3n">Memory System loads context</div>
+        <div class="step-detail" data-i18n="life.s3d">Injects session summary from last autoDream consolidation. Attaches project-level notes.</div>
       </div>
       <div class="step-tag" style="color:var(--teal);border-color:rgba(45,212,191,0.3)">Memory</div>
     </div>
@@ -681,8 +693,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">04</div>
       <div class="step-content">
-        <div class="step-name">Query Engine calls LLM</div>
-        <div class="step-detail">Streams response. Parses tool_use blocks incrementally. Accounts tokens against budget.</div>
+        <div class="step-name" data-i18n="life.s4n">Query Engine calls LLM</div>
+        <div class="step-detail" data-i18n="life.s4d">Streams response. Parses tool_use blocks incrementally. Accounts tokens against budget.</div>
       </div>
       <div class="step-tag" style="color:var(--blue);border-color:rgba(96,165,250,0.3)">Query Engine</div>
     </div>
@@ -690,8 +702,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">05</div>
       <div class="step-content">
-        <div class="step-name">Tool System executes</div>
-        <div class="step-detail">Validates input schema. Checks permissions. Runs in sandbox. Classifies errors (retryable / fatal / needs-human).</div>
+        <div class="step-name" data-i18n="life.s5n">Tool System executes</div>
+        <div class="step-detail" data-i18n="life.s5d">Validates input schema. Checks permissions. Runs in sandbox. Classifies errors (retryable / fatal / needs-human).</div>
       </div>
       <div class="step-tag" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">Tools</div>
     </div>
@@ -699,8 +711,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">06</div>
       <div class="step-content">
-        <div class="step-name">Memory threshold check</div>
-        <div class="step-detail">If context > 85%, trigger autoCompact before next LLM call. Checkpoint raw messages to disk.</div>
+        <div class="step-name" data-i18n="life.s6n">Memory threshold check</div>
+        <div class="step-detail" data-i18n="life.s6d">If context > 85%, trigger autoCompact before next LLM call. Checkpoint raw messages to disk.</div>
       </div>
       <div class="step-tag" style="color:var(--teal);border-color:rgba(45,212,191,0.3)">Memory</div>
     </div>
@@ -708,8 +720,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">07</div>
       <div class="step-content">
-        <div class="step-name">Loop until complete</div>
-        <div class="step-detail">Steps 4–6 repeat. Approval gates surface destructive actions. Max iteration guard prevents runaway.</div>
+        <div class="step-name" data-i18n="life.s7n">Loop until complete</div>
+        <div class="step-detail" data-i18n="life.s7d">Steps 4–6 repeat. Approval gates surface destructive actions. Max iteration guard prevents runaway.</div>
       </div>
       <div class="step-tag" style="color:var(--blue);border-color:rgba(96,165,250,0.3)">Agent Loop</div>
     </div>
@@ -717,8 +729,8 @@
     <div class="lifecycle-step" onclick="selectStep(this)">
       <div class="step-num">08</div>
       <div class="step-content">
-        <div class="step-name">Result surfaces to IDE</div>
-        <div class="step-detail">Diff preview sent to bridge. KAIROS daemon queued to consolidate session transcript on idle.</div>
+        <div class="step-name" data-i18n="life.s8n">Result surfaces to IDE</div>
+        <div class="step-detail" data-i18n="life.s8d">Diff preview sent to bridge. KAIROS daemon queued to consolidate session transcript on idle.</div>
       </div>
       <div class="step-tag" style="color:var(--coral);border-color:rgba(249,115,22,0.3)">IDE Bridge</div>
     </div>
@@ -730,46 +742,46 @@
 
 <!-- KEY FINDINGS -->
 <section id="findings" style="padding:6rem 2rem;max-width:1100px;margin:0 auto;">
-  <p class="section-label">From the Leaked Source</p>
-  <h2 class="section-title">What we learned</h2>
-  <p class="section-desc">Key architectural facts that emerged from the March 2026 source map leak.</p>
+  <p class="section-label" data-i18n="find.label">From the Leaked Source</p>
+  <h2 class="section-title" data-i18n="find.title">What we learned</h2>
+  <p class="section-desc" data-i18n="find.desc">Key architectural facts that emerged from the March 2026 source map leak.</p>
 
   <div class="findings-grid">
 
     <div class="finding-card">
       <div class="finding-icon">⚙️</div>
-      <div class="finding-title">46K lines in the Query Engine</div>
-      <div class="finding-text">The module that "just calls the API" is the largest in the codebase. Streaming, retry, backpressure, caching, token accounting — none of it is trivial at production scale.</div>
+      <div class="finding-title" data-i18n="find.f1t">46K lines in the Query Engine</div>
+      <div class="finding-text" data-i18n="find.f1x">The module that "just calls the API" is the largest in the codebase. Streaming, retry, backpressure, caching, token accounting — none of it is trivial at production scale.</div>
     </div>
 
     <div class="finding-card">
       <div class="finding-icon">🔧</div>
-      <div class="finding-title">29K lines in the Tool System</div>
-      <div class="finding-text">Each of 40+ tools ships with <strong>typed schemas, permission requirements, error taxonomy, and sandbox config</strong>. "Execute bash" is 29,000 lines when done safely.</div>
+      <div class="finding-title" data-i18n="find.f2t">29K lines in the Tool System</div>
+      <div class="finding-text" data-i18n-html="true" data-i18n="find.f2x">Each of 40+ tools ships with <strong>typed schemas, permission requirements, error taxonomy, and sandbox config</strong>. "Execute bash" is 29,000 lines when done safely.</div>
     </div>
 
     <div class="finding-card">
       <div class="finding-icon">🧠</div>
-      <div class="finding-title">Memory runs in a fork</div>
-      <div class="finding-text">The KAIROS daemon runs in a <strong>forked subprocess</strong> to prevent memory consolidation from corrupting the live agent context. Process isolation as a correctness guarantee.</div>
+      <div class="finding-title" data-i18n="find.f3t">Memory runs in a fork</div>
+      <div class="finding-text" data-i18n-html="true" data-i18n="find.f3x">The KAIROS daemon runs in a <strong>forked subprocess</strong> to prevent memory consolidation from corrupting the live agent context. Process isolation as a correctness guarantee.</div>
     </div>
 
     <div class="finding-card">
       <div class="finding-icon">🕵️</div>
-      <div class="finding-title">Undercover Mode</div>
-      <div class="finding-text"><code>undercover.ts</code> blocks internal codenames (Capybara, Tengu) from commit messages and suppresses AI attribution when operating in public open-source repositories.</div>
+      <div class="finding-title" data-i18n="find.f4t">Undercover Mode</div>
+      <div class="finding-text" data-i18n-html="true" data-i18n="find.f4x"><code>undercover.ts</code> blocks internal codenames (Capybara, Tengu) from commit messages and suppresses AI attribution when operating in public open-source repositories.</div>
     </div>
 
     <div class="finding-card">
       <div class="finding-icon">📊</div>
-      <div class="finding-title">250K API calls wasted daily</div>
-      <div class="finding-text">A comment in the source: before <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code>, 1,279 sessions/day were burning ~250,000 API calls on consecutive compaction failures. Fixed in 3 lines.</div>
+      <div class="finding-title" data-i18n="find.f5t">250K API calls wasted daily</div>
+      <div class="finding-text" data-i18n-html="true" data-i18n="find.f5x">A comment in the source: before <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code>, 1,279 sessions/day were burning ~250,000 API calls on consecutive compaction failures. Fixed in 3 lines.</div>
     </div>
 
     <div class="finding-card">
       <div class="finding-icon">🚀</div>
-      <div class="finding-title">Next model: Capybara</div>
-      <div class="finding-text">The source references beta flags for a model family codenamed <strong>Capybara</strong> with a significantly larger context window. "Fast" and "slow" variants implied by the routing logic.</div>
+      <div class="finding-title" data-i18n="find.f6t">Next model: Capybara</div>
+      <div class="finding-text" data-i18n-html="true" data-i18n="find.f6x">The source references beta flags for a model family codenamed <strong>Capybara</strong> with a significantly larger context window. "Fast" and "slow" variants implied by the routing logic.</div>
     </div>
 
   </div>
@@ -779,15 +791,15 @@
 
 <!-- CODE COMPARE -->
 <section id="code" style="padding:6rem 2rem;max-width:1100px;margin:0 auto;">
-  <p class="section-label">Implementation</p>
-  <h2 class="section-title">Wrapper vs Harness</h2>
-  <p class="section-desc">The same "run an agent" task — two fundamentally different approaches. This is why production systems fail.</p>
+  <p class="section-label" data-i18n="code.label">Implementation</p>
+  <h2 class="section-title" data-i18n="code.title">Wrapper vs Harness</h2>
+  <p class="section-desc" data-i18n="code.desc">The same "run an agent" task — two fundamentally different approaches. This is why production systems fail.</p>
 
   <div class="code-compare">
     <div class="code-pane">
       <div class="code-header">
         <div class="code-dot" style="background:var(--coral)"></div>
-        <span class="code-label">wrapper.py — what most people build</span>
+        <span class="code-label" data-i18n="code.badLabel">wrapper.py — what most people build</span>
       </div>
 <pre><span class="cm"># Looks fine. Falls apart in production.</span>
 
@@ -823,7 +835,7 @@
     <div class="code-pane">
       <div class="code-header">
         <div class="code-dot" style="background:var(--green)"></div>
-        <span class="code-label">harness.py — what Claude Code taught us</span>
+        <span class="code-label" data-i18n="code.goodLabel">harness.py — what Claude Code taught us</span>
       </div>
 <pre><span class="cm"># Every failure mode handled explicitly.</span>
 
@@ -859,29 +871,34 @@
   </div>
 
   <div style="margin-top:2rem;text-align:center;">
-    <a href="examples/python/minimal_agent/agent.py" class="btn btn-ghost">View full Python source</a>
+    <a href="https://github.com/seanyoungw/harness-decoded" class="btn btn-ghost" data-repo data-repo-path="/blob/main/examples/python/minimal_agent/agent.py" target="_blank" rel="noopener" data-i18n="code.btnPy">View full Python source</a>
     &nbsp;&nbsp;
-    <a href="examples/typescript/minimal-agent/agent.ts" class="btn btn-ghost">View TypeScript source</a>
+    <a href="https://github.com/seanyoungw/harness-decoded" class="btn btn-ghost" data-repo data-repo-path="/blob/main/examples/typescript/minimal-agent/agent.ts" target="_blank" rel="noopener" data-i18n="code.btnTs">View TypeScript source</a>
   </div>
 
   <div style="margin-top:2rem;text-align:center;padding:2rem 0;">
-    <p style="color:var(--muted);font-size:13px;margin-bottom:1.5rem;">Explore more in depth</p>
-    <a href="/website/kairos.html" class="btn btn-ghost" style="margin-right:.75rem;">KAIROS &amp; autoDream →</a>
-    <a href="/website/playground.html" class="btn btn-primary">Architecture Playground →</a>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:1.5rem;" data-i18n="code.deep">Explore more in depth</p>
+    <a href="kairos.html" class="btn btn-ghost" style="margin-right:.75rem;" data-i18n="code.btnKairos">KAIROS &amp; autoDream →</a>
+    <a href="compaction.html" class="btn btn-ghost" style="margin-right:.75rem;" data-i18n="code.btnCompact">Compaction lab →</a>
+    <a href="playground.html" class="btn btn-primary" data-i18n="code.btnPlay">Architecture Playground →</a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <p><strong style="color:var(--text)">harness-decoded</strong> — An open analysis of the Claude Code architecture.</p>
+  <p data-i18n-html="true" data-i18n="foot.line1"><strong style="color:var(--text)">harness-decoded</strong> — An open analysis of the Claude Code architecture.</p>
   <p style="margin-top:0.5rem;">
-    <a href="https://github.com/YOUR_USERNAME/harness-decoded">GitHub</a> ·
-    <a href="docs/01-architecture.md">Architecture Docs</a> ·
-    <a href="docs/02-harness-vs-wrapper.md">Harness vs Wrapper</a>
+    <a href="https://github.com/seanyoungw/harness-decoded" data-repo>GitHub</a> ·
+    <a href="../docs/01-architecture.md" data-doc="01-architecture.md">Architecture</a> ·
+    <a href="../docs/02-harness-vs-wrapper.md" data-doc="02-harness-vs-wrapper.md">Harness vs Wrapper</a> ·
+    <a href="../docs/00-code-map.md" data-doc="00-code-map.md">Code map</a> ·
+    <a href="../docs/methodology.md" data-doc="methodology.md">Methodology</a> ·
+    <a href="../docs/zh/README.md" data-i18n="foot.zhHub">中文文档索引</a>
   </p>
-  <p style="margin-top:1rem;font-size:11px;">No leaked source code is reproduced here. All examples are original implementations. MIT License.</p>
+  <p style="margin-top:1rem;font-size:11px;" data-i18n="foot.legal">No leaked source code is reproduced here. All examples are original implementations. MIT License.</p>
 </footer>
 
+<script src="js/i18n.js"></script>
 <script>
   function toggleLayer(el) {
     const detail = el.querySelector('.layer-detail');

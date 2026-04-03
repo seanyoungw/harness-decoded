@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "title": "harness-decoded — Claude Code 架构解读"
+  },
+  "nav": {
+    "overview": "总览",
+    "back": "← 返回",
+    "principles": "原理动画",
+    "compaction": "上下文压缩",
+    "lifecycle": "请求生命周期",
+    "tools": "工具系统",
+    "multiagent": "多智能体",
+    "arch": "架构",
+    "playground": "playground"
+  },
+  "hero": {
+    "eyebrow": "Claude Code 架构 · 解读",
+    "h1": "关键是 <span>harness</span><br>不是模型",
+    "sub": "2026 年 3 月的源码图泄漏揭示了一点：<strong>Claude Code 的创新不在 AI，而在围绕它的执行框架。</strong>约 51.2 万行代码、40+ 工具、内存守护进程、隐蔽提交模式——这就是被拆解后的架构。",
+    "btnExplore": "探索架构",
+    "btnAnim": "动画演示 →",
+    "btnGh": "在 GitHub 上查看",
+    "scroll": "向下滚动"
+  },
+  "arch": {
+    "label": "核心架构",
+    "title": "Harness：五层结构",
+    "desc": "点击任一层展开细节。模型在五层之下——只是组件之一，不是整个系统。",
+    "modelFoot": "Claude 模型（Anthropic API）— <em>五层之中的一层，而非系统本身</em>"
+  },
+  "layer": {
+    "tools": {
+      "name": "工具系统",
+      "desc": "40+ 工具 · 权限门禁 · 沙箱执行 · 类型化 I/O",
+      "stat": "约 29K 行",
+      "detail": "Harness 中概念表面积最大的一层。每个工具不只是函数，而是带模式校验、权限、错误分类的单元。执行前会检查 <code>requiredPermissions</code> 与 <code>PermissionSet</code>。写文件需 <code>FS_WRITE</code>；Shell 需 <code>SHELL_EXEC</code>（默认拒绝）。公开仓库场景下 <code>undercover.ts</code> 会清理提交元数据。常见工具：<code>bash</code>、<code>read_file</code>、<code>patch_file</code>、<code>web_fetch</code>、<code>spawn_subagent</code>、<code>ask_user</code>。"
+    },
+    "query": {
+      "name": "查询引擎",
+      "desc": "流式 · 背压 · 重试 · token 统计 · 响应缓存",
+      "stat": "约 46K 行",
+      "detail": "单体最大的模块之一——说明「调 API」在生产里有多复杂：按 token 流式解析、增量拼出 tool 调用结构；429/529/500/503 等可重试，400/401 等直接失败；限流用指数退避+抖动；超长上下文触发压缩后最多再试一次；多子智能体场景下可缓存相同工具观测序列；并按调用/会话统计费用。"
+    },
+    "mem": {
+      "name": "内存系统",
+      "desc": "autoCompact · KAIROS · autoDream · checkpoint",
+      "detail": "三大子系统：<code>autoCompact</code> 在上下文约 85% 时触发，用摘要保留任务规格、约束与进度。<code>KAIROS</code> 在用户空闲时于<strong>独立进程</strong>中整理会话，避免破坏在线上下文。<code>autoDream</code> 合并转写、消解矛盾（新事实优先）、把暂定笔记固化为事实，并 checkpoint 供下次会话加载。泄漏中曾提到：在 <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code> 修复前，大量会话因连续压缩失败空耗 API。"
+    },
+    "multi": {
+      "name": "多智能体编排",
+      "desc": "任务分解 · 子代理 · fan-out · 结果汇总",
+      "detail": "三种模式：<strong>顺序</strong>默认；<strong>并行 fan-out</strong> 独立子任务并发后在屏障处汇总；<strong>Swarm</strong> 可动态再 spawn。子代理只拿任务相关上下文，降低 token 与串话风险；失败策略可按 spawn 配置重试/跳过/中止传播。"
+    },
+    "ide": {
+      "name": "IDE 桥接",
+      "desc": "终端 UI（Ink）· VSCode · JetBrains · 审批协议",
+      "stat": "双向",
+      "detail": "三种实现、同一协议：终端用 <code>Ink</code> 渲染结构化 UI；编辑器插件经本地 socket 收发文件/光标/诊断与 diff 预览、破坏性操作审批、代理状态。桥接层很薄，只做序列化，不做 AI 决策，因此 harness 可无头测试。"
+    }
+  },
+  "life": {
+    "label": "请求生命周期",
+    "title": "发出一条消息后<br>发生了什么",
+    "desc": "单次请求会穿过各层。点击步骤查看内部行为。",
+    "s1n": "IDE 桥接接收任务",
+    "s1d": "序列化用户输入、当前文件、光标位置 → 结构化 TaskObject",
+    "s2n": "编排器分解任务",
+    "s2d": "判断单代理还是多路 fan-out；为子代理分配上下文预算",
+    "s3n": "内存系统注入上下文",
+    "s3d": "加载上次 autoDream 摘要与项目级笔记",
+    "s4n": "查询引擎调用 LLM",
+    "s4d": "流式响应；增量解析 tool_use；记账 token 预算",
+    "s5n": "工具系统执行",
+    "s5d": "校验 schema、权限、沙箱；错误分为可重试/致命/需人工",
+    "s6n": "内存阈值检查",
+    "s6d": "上下文 >85% 则在下次调用前 autoCompact；原始消息可 checkpoint",
+    "s7n": "循环直至完成",
+    "s7d": "重复 4–6 步；审批门控拦截危险操作；max_iterations 防止死循环",
+    "s8n": "结果回到 IDE",
+    "s8d": "diff 预览经桥接展示；空闲时排队 KAIROS 整理会话"
+  },
+  "find": {
+    "label": "来自泄漏与社区讨论",
+    "title": "我们知道了什么",
+    "desc": "2026 年 3 月源码图泄漏后浮现的关键架构事实（量级为社区共识，非逐行验证）。",
+    "f1t": "查询引擎约 46K 行",
+    "f1x": "「只是调 API」的模块却是最大的之一：流式、重试、背压、缓存、计费——生产规模下都不简单。",
+    "f2t": "工具系统约 29K 行",
+    "f2x": "40+ 工具各自带 <strong>schema、权限、错误分类与沙箱</strong>。安全的 bash 在生产里就是工程问题。",
+    "f3t": "内存在独立进程整理",
+    "f3x": "KAIROS 类守护进程常在 <strong>fork 出的子进程</strong> 跑整理，避免破坏在线代理上下文——用进程隔离换正确性。",
+    "f4t": "Undercover 模式",
+    "f4x": "<code>undercover.ts</code> 在公开仓库场景下清理内部代号并弱化 AI 署名等元数据。",
+    "f5t": "压缩失败曾日耗约 25 万次调用",
+    "f5x": "源码注释称：在 <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code> 前，大量会话因连续压缩失败空烧 API，数行修复缓解。",
+    "f6t": "下一代代号 Capybara",
+    "f6x": "源码曾出现更大上下文的模型族 beta 开关与快慢路由线索（社区解读）。"
+  },
+  "code": {
+    "label": "实现对照",
+    "title": "Wrapper 与 Harness",
+    "desc": "同样是「跑代理」，结构完全不同——这也是多数原型在生产里崩溃的原因。",
+    "badLabel": "wrapper.py — 常见写法",
+    "goodLabel": "harness.py — Claude Code 式思路",
+    "btnPy": "完整 Python 示例",
+    "btnTs": "TypeScript 示例",
+    "deep": "继续深入",
+    "btnKairos": "KAIROS 与 autoDream →",
+    "btnCompact": "压缩实验台 →",
+    "btnPlay": "Playground →"
+  },
+  "foot": {
+    "line1": "<strong style=\"color:var(--text)\">harness-decoded</strong> — 对 Claude Code 式架构的开放解读（教学向，无泄漏源码）。",
+    "zhHub": "中文文档索引",
+    "legal": "本站不复制任何泄漏源码；示例均为原创教学实现。MIT License。"
+  },
+  "pages": {
+    "principles": {
+      "lead": "下列循环为<strong>教学示意</strong>，对应仓库内 <code>examples/</code> 中的 harness 示例，而非任何商业产品源码。对照 <a href=\"../docs/zh/00-code-map.md\" style=\"color:var(--purple2)\">docs/zh/00-code-map.md</a> 可查文档、代码与动画的映射。",
+      "s1h": "1 · 代理循环",
+      "s1c": "观察上下文 → 模型决策 → 工具执行 → 更新内存。与 Level 1–3 的 <code>AgentHarness.run</code> 同节律。",
+      "s2h": "2 · 权限门",
+      "s2c": "工具在 <code>PermissionSet.check</code> 通过前不会执行；缺失权限则拦截（见 <code>Tool.execute</code>）。",
+      "s3h": "3 · 上下文压缩",
+      "s3c": "估计上下文超过阈值时，旧轮次折叠为结构化摘要——见 <code>MemorySystem.maybe_compact</code> 与 <a href=\"compaction.html\" style=\"color:var(--teal)\">压缩实验台 →</a>",
+      "s4h": "4 · 并行 fan-out",
+      "s4c": "独立子任务在并发上限内运行再聚合——Level 2 的 <code>--parallel</code> 与 Level 3 的 swarm。",
+      "docTitle": "原理动画 | harness-decoded",
+      "h1": "动态演示：Harness 在做什么",
+      "hintLoop": "点击某一环或按 空格 / → 前进。",
+      "hintGate": "点击闸门切换开/合；Shift+点击：拒绝路径。",
+      "compactRun": "执行压缩",
+      "hintFan": "反复点击中心 hub 以 0～3 个方式点亮子代理。"
+    },
+    "compaction": {
+      "docTitle": "上下文压缩实验台 | harness-decoded",
+      "title": "上下文压缩实验台",
+      "sub": "拖动滑块模拟「利用率 vs 阈值」（示例默认约 85%）。与 <code>MemorySystem.maybe_compact</code>、ADR-003 一致。",
+      "lab": "估计上下文占用",
+      "below": "<strong>低于阈值。</strong>完整对话仍留在 prompt 中；每轮 token 仍会累积——参见生命周期页的 token 图。",
+      "above": "<strong>进入压缩路径。</strong>Harness 将较早轮次摘要为结构化块（任务规格、进度、开放问题）；摘要前可能写入 checkpoint。",
+      "note": "阅读 <a href=\"../docs/zh/adr/003-compaction-triggers.md\">ADR-003</a> 与 <a href=\"../docs/zh/05-memory-context.md\">文档 05</a>。动画总览：<a href=\"principles.html\">原理动画 →</a>",
+      "foot": "完整请求生命周期步进器 →"
+    },
+    "kairos": {
+      "foot": "<a href=\"index.html\">harness-decoded</a> — <a href=\"../docs/zh/05-memory-context.md\">《内存与上下文》全文 →</a>"
+    },
+    "requestLifecycle": {
+      "back": "← 总览",
+      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/01-architecture.md\">架构 →</a> · <a href=\"../../principles.html\">动画 →</a>"
+    },
+    "toolSystem": {
+      "back": "← 总览",
+      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/03-tool-system.md\">工具系统文档 →</a> · <a href=\"../../principles.html\">原则 →</a>"
+    },
+    "multiAgent": {
+      "back": "← 总览",
+      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/06-multi-agent.md\">多智能体文档 →</a> · <a href=\"../../principles.html\">原则 →</a>"
+    },
+    "playground": {
+      "navTitle": "Playground"
+    }
+  }
+}

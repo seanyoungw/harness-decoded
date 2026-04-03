@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Architecture Playground — harness-decoded</title>
+<script src="js/site-base.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lang-switch.css">
 <style>
   :root {
     --bg:#0a0a0f;--bg2:#11111a;--bg3:#1a1a28;--bg4:#22223a;
@@ -39,12 +41,14 @@
 
   /* ── CANVAS ── */
   .canvas-area{position:relative;overflow:hidden;background:var(--bg);background-image:radial-gradient(circle,rgba(120,120,200,0.06) 1px,transparent 1px);background-size:24px 24px;}
+  #flow-svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+  .placed-comp.flow-pulse{box-shadow:0 0 0 2px rgba(139,92,246,0.7),0 0 24px rgba(139,92,246,0.35);}
   .canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:.4;transition:opacity .3s;}
   .canvas-hint.hidden{opacity:0;}
   .hint-icon{font-size:2rem;margin-bottom:.5rem;}
   .hint-text{font-size:12px;color:var(--muted);line-height:1.8;}
 
-  .placed-comp{position:absolute;min-width:160px;padding:.6rem 1rem;border-radius:8px;border:1px solid;background:var(--bg2);cursor:move;user-select:none;font-size:12px;transition:box-shadow .15s;}
+  .placed-comp{position:absolute;z-index:1;min-width:160px;padding:.6rem 1rem;border-radius:8px;border:1px solid;background:var(--bg2);cursor:move;user-select:none;font-size:12px;transition:box-shadow .15s;}
   .placed-comp:hover{box-shadow:0 0 0 1px currentColor;}
   .placed-comp.selected{box-shadow:0 0 0 2px currentColor,0 0 12px rgba(139,92,246,0.2);}
   .comp-name{font-weight:500;margin-bottom:2px;}
@@ -77,14 +81,24 @@
   .tb-btn.primary{background:var(--purple);border-color:var(--purple);color:#fff;}
   .tb-btn.primary:hover{background:var(--purple2);}
   .comp-count{font-size:11px;color:var(--muted);margin-left:auto;}
+  .flow-status{font-size:10px;color:var(--muted);max-width:200px;line-height:1.4;margin-right:.5rem;}
+  .flow-warn{font-size:10px;color:var(--amber);max-width:180px;line-height:1.3;margin-right:.5rem;}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html" class="nav-logo">harness<span>-decoded</span></a>
-  <span class="nav-title">Architecture Playground</span>
-  <a href="index.html" class="nav-back">← back</a>
+  <span class="nav-title" data-i18n="pages.playground.navTitle">Architecture Playground</span>
+  <div style="display:flex;gap:1rem;align-items:center;font-size:12px;">
+    <span class="lang-switch">
+      <button type="button" data-lang="en" aria-label="English">en</button>
+      <span class="lang-sep">/</span>
+      <button type="button" data-lang="zh" aria-label="简体中文">zh</button>
+    </span>
+    <a href="principles.html" class="nav-back" style="opacity:1;color:var(--purple2)" data-i18n="nav.principles">Principles</a>
+    <a href="index.html" class="nav-back" data-i18n="nav.back">← back</a>
+  </div>
 </nav>
 
 <div class="workspace">
@@ -151,6 +165,7 @@
 
   <!-- CANVAS -->
   <div class="canvas-area" id="canvas">
+    <svg id="flow-svg" aria-hidden="true"></svg>
     <div class="canvas-hint" id="hint">
       <div class="hint-icon">⬡</div>
       <div class="hint-text">Drag components from the left panel<br>to design your agent architecture</div>
@@ -175,13 +190,21 @@
     <div class="toolbar">
       <button class="tb-btn" onclick="clearCanvas()">clear</button>
       <button class="tb-btn primary" onclick="generateCode()">⚡ generate</button>
+      <button class="tb-btn" onclick="runFlowSim()">▶ simulate flow</button>
+      <span class="flow-warn" id="flow-warn"></span>
+      <span class="flow-status" id="flow-status"></span>
       <span class="comp-count" id="comp-count">0 components</span>
     </div>
   </div>
 </div>
 
+<script src="js/i18n.js"></script>
+<script src="js/playground-flow.js"></script>
 <script>
 const canvas = document.getElementById('canvas');
+const flowSvg = document.getElementById('flow-svg');
+const flowWarn = document.getElementById('flow-warn');
+const flowStatus = document.getElementById('flow-status');
 const hint = document.getElementById('hint');
 let placed = [];
 let currentLang = 'python';
@@ -237,6 +260,7 @@ function addComponent(data, x, y) {
   placed.push({id, ...data, x, y});
   updateHint();
   generateCode();
+  if (window.PlaygroundFlow) PlaygroundFlow.warnBashPerms(flowWarn);
 }
 
 document.addEventListener('mousemove', e => {
@@ -246,7 +270,10 @@ document.addEventListener('mousemove', e => {
   draggingEl.style.top = (e.clientY - r.top - dragOffset.y) + 'px';
 });
 
-document.addEventListener('mouseup', () => { draggingEl = null; });
+document.addEventListener('mouseup', () => {
+  draggingEl = null;
+  if (window.PlaygroundFlow) PlaygroundFlow.scheduleRedraw();
+});
 
 function removeComp(id) {
   placed = placed.filter(p => p.id !== id);
@@ -260,6 +287,18 @@ function clearCanvas() {
   canvas.querySelectorAll('.placed-comp').forEach(el => el.remove());
   updateHint();
   generateCode();
+  if (window.PlaygroundFlow) {
+    PlaygroundFlow.stopSimulation();
+    PlaygroundFlow.clearWarn(flowWarn);
+    flowStatus.textContent = '';
+    PlaygroundFlow.scheduleRedraw();
+  }
+}
+
+function runFlowSim() {
+  if (!window.PlaygroundFlow) return;
+  PlaygroundFlow.warnBashPerms(flowWarn);
+  PlaygroundFlow.runSimulation(flowStatus);
 }
 
 function updateHint() {
@@ -314,6 +353,10 @@ function generateCode() {
     codeEl.innerHTML = generatePython({hasHarness,hasQuery,hasMemory,hasAudit,hasKairos,hasFanout,hasSwarm,tools,hasPerms,hasBash,hasNet});
   } else {
     codeEl.innerHTML = generateTypeScript({hasHarness,hasQuery,hasMemory,hasAudit,hasKairos,hasFanout,hasSwarm,tools,hasPerms,hasBash,hasNet});
+  }
+  if (window.PlaygroundFlow) {
+    PlaygroundFlow.warnBashPerms(flowWarn);
+    PlaygroundFlow.scheduleRedraw();
   }
 }
 
@@ -532,11 +575,17 @@ function generateTypeScript(f) {
 
 // Auto-populate with a starter example
 window.addEventListener('load', () => {
+  PlaygroundFlow.init({
+    svg: flowSvg,
+    canvas: canvas,
+    getPlaced: function () { return placed; },
+  });
   addComponent({type:'harness',color:'#8b5cf6',label:'AgentHarness',tag:'orchestration loop'}, 160, 80);
   addComponent({type:'query',color:'#60a5fa',label:'Query Engine',tag:'LLM calls + retry'}, 160, 200);
   addComponent({type:'tool_read',color:'#f59e0b',label:'ReadFileTool',tag:'FS_READ'}, 380, 100);
   addComponent({type:'tool_list',color:'#f59e0b',label:'ListDirectoryTool',tag:'FS_READ'}, 380, 190);
   addComponent({type:'perms',color:'#7070a0',label:'PermissionSet',tag:'access control'}, 160, 320);
+  PlaygroundFlow.scheduleRedraw();
 });
 </script>
 </body>
