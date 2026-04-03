@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/lang-switch.css">
+<link rel="stylesheet" href="css/arch-diagram.css">
 <style>
   :root {
     --bg:#0a0a0f;--bg2:#11111a;--border:rgba(120,120,200,0.15);
@@ -23,11 +24,13 @@
   .nav-links a{color:var(--muted);text-decoration:none;}
   .nav-links a:hover{color:var(--purple);}
 
-  main{max-width:720px;margin:0 auto;padding:6rem 1.5rem 3rem;}
+  main{max-width:920px;margin:0 auto;padding:6rem 1.5rem 3rem;}
   h1{font-family:var(--font-head);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;margin-bottom:.5rem;}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:2.5rem;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:2rem;}
+  h2{font-family:var(--font-head);font-size:1.35rem;font-weight:800;margin:2.5rem 0 .75rem;color:var(--text);}
+  .lead{color:var(--muted);font-size:13px;margin-bottom:1.25rem;line-height:1.85;}
 
-  .lab{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;}
+  .lab{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;}
   label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
   input[type=range]{width:100%;accent-color:var(--purple);margin-bottom:.5rem;}
   .pct{font-family:var(--font-head);font-size:2.5rem;font-weight:800;color:var(--teal);}
@@ -40,6 +43,16 @@
   .note a{color:var(--purple);}
   footer{text-align:center;padding:2rem;color:var(--muted);font-size:12px;}
   footer a{color:var(--purple);}
+
+  .subs-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:1rem;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .subs-table th,.subs-table td{padding:.75rem 1rem;border-bottom:1px solid var(--border);text-align:left;}
+  .subs-table th{background:var(--bg2);color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
+  .subs-table tr:last-child td{border-bottom:none;}
+  .subs-table td:first-child{font-weight:600;color:var(--text);}
+  .guard-box{margin-top:1rem;padding:1.25rem;border-left:3px solid var(--amber);background:rgba(245,158,11,.06);border-radius:0 10px 10px 0;font-size:13px;color:var(--muted);}
+  .guard-box code{background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--teal);font-size:11px;}
+  .cross-links{font-size:12px;color:var(--muted);margin-top:1.5rem;line-height:2;}
+  .cross-links a{color:var(--purple);}
 </style>
 </head>
 <body>
@@ -53,6 +66,7 @@
     </li>
     <li><a href="principles.html" data-i18n="nav.principles">Principles</a></li>
     <li><a href="index.html" data-i18n="nav.overview">Overview</a></li>
+    <li><a href="kairos.html">KAIROS timeline</a></li>
     <li><a href="../docs/05-memory-context.md" data-doc="05-memory-context.md">Doc 05 →</a></li>
   </ul>
 </nav>
@@ -69,43 +83,72 @@
     <div class="state" id="state"></div>
   </div>
 
+  <h2 data-i18n="pages.compaction.subsTitle">Three memory subsystems</h2>
+  <p class="lead" data-i18n="pages.compaction.subsLead">Production harnesses split <strong>hot-path compaction</strong> (autoCompact during the agent loop) from <strong>idle consolidation</strong> (KAIROS / autoDream in an isolated process). They answer different questions: “can the next LLM call fit?” vs “what should the next session remember?”</p>
+  <table class="subs-table">
+    <thead>
+      <tr>
+        <th data-i18n="pages.compaction.colSubsystem">Subsystem</th>
+        <th data-i18n="pages.compaction.colWhen">When it runs</th>
+        <th data-i18n="pages.compaction.colPreserves">What it preserves</th>
+      </tr>
+    </thead>
+    <tbody data-i18n-html="true" data-i18n="pages.compaction.subsTbody">
+      <tr>
+        <td><code>autoCompact</code></td>
+        <td>During the loop, when estimated fill crosses ~85% of the context window</td>
+        <td>Task spec, constraints, progress, open questions — as a structured summary block</td>
+      </tr>
+      <tr>
+        <td><code>KAIROS</code></td>
+        <td>After the session, while the user is idle; runs in a <strong>forked subprocess</strong></td>
+        <td>Merges transcripts, queues durable facts; cannot corrupt live agent memory</td>
+      </tr>
+      <tr>
+        <td><code>autoDream</code></td>
+        <td>Inside KAIROS consolidation passes</td>
+        <td>Resolves contradictions (newer wins), promotes tentative notes, writes checkpoints</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="diagram-compaction" data-i18n="pages.compaction.pipeTitle">Compaction trigger pipeline</h2>
+  <p class="lead" data-i18n="pages.compaction.pipeLead">Each box is clickable. <strong>Public</strong> = anthropics/claude-code tree; <strong>Doc / Example</strong> = this repo; <strong>Disclosure</strong> = leak-era architecture without a matching public file — see methodology.</p>
+  <div class="arch-diagram-wrap">
+    <div class="arch-diagram-title" data-i18n="pages.compaction.pipeDiagramLabel">Hot path (simplified)</div>
+    <div class="arch-pipeline">
+      <button type="button" class="arch-hotspot" data-node="compact-estimate"><strong data-i18n="pages.compaction.pipe1a">Estimate tokens</strong><br><span data-i18n="pages.compaction.pipe1b">rolling window</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+      <span class="arch-arrow">→</span>
+      <button type="button" class="arch-hotspot" data-node="compact-threshold"><strong data-i18n="pages.compaction.pipe2a">&gt; threshold?</strong><br><span data-i18n="pages.compaction.pipe2b">~85% default</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+      <span class="arch-arrow">→</span>
+      <button type="button" class="arch-hotspot" data-node="compact-maybe"><strong data-i18n="pages.compaction.pipe3a">maybe_compact</strong><br><span data-i18n="pages.compaction.pipe3b">gate + failures</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+      <span class="arch-arrow">→</span>
+      <button type="button" class="arch-hotspot" data-node="compact-checkpoint"><strong data-i18n="pages.compaction.pipe4a">Checkpoint</strong><br><span data-i18n="pages.compaction.pipe4b">raw history</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+      <span class="arch-arrow">→</span>
+      <button type="button" class="arch-hotspot" data-node="compact-summarize"><strong data-i18n="pages.compaction.pipe5a">Summarize</strong><br><span data-i18n="pages.compaction.pipe5b">LLM pass</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+      <span class="arch-arrow">→</span>
+      <button type="button" class="arch-hotspot" data-node="compact-inject"><strong data-i18n="pages.compaction.pipe6a">Inject summary</strong><br><span data-i18n="pages.compaction.pipe6b">shrink prompt</span><kbd data-i18n="pages.compaction.pipeKb">upstream</kbd></button>
+    </div>
+    <p class="arch-legend" data-i18n-html="true" data-i18n="pages.compaction.pipeLegend"><span class="t-public">public</span> · <span class="t-docs">docs</span> · <span class="t-example">example</span> · <span class="t-disclosure">disclosure</span> — tier badges in the popup explain what you are opening.</p>
+  </div>
+
+  <h2 data-i18n="pages.compaction.guardTitle">Failure guard: consecutive compaction</h2>
+  <div class="guard-box" data-i18n-html="true" data-i18n="pages.compaction.guardBody">Leaked commentary described sessions stuck in repeated autoCompact failures, burning API quota. A hard cap — <code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3</code> in teaching code — stops infinite retry loops and surfaces an error to the user. Pair with the <a href="index.html#lifecycle">lifecycle</a> token chart: without compaction, cost compounds every iteration.</div>
+
+  <h2 data-i18n="pages.compaction.crossTitle">Continue</h2>
+  <p class="cross-links" data-i18n-html="true" data-i18n="pages.compaction.crossBody"><a href="src/pages/request-lifecycle.html">Request lifecycle stepper</a> · <a href="kairos.html">KAIROS timeline</a> · <a href="../docs/adr/003-compaction-triggers.md">ADR-003</a> · <a href="../docs/05-memory-context.md">Doc 05</a> · <a href="principles.html">Animated principles</a></p>
+
   <p class="note" data-i18n-html="true" data-i18n="pages.compaction.note">Read <a href="../docs/adr/003-compaction-triggers.md">ADR-003: compaction triggers</a> and <a href="../docs/05-memory-context.md">Doc 05 — Memory &amp; Context</a>. Animated overview: <a href="principles.html">Principles →</a></p>
 </main>
 
 <footer><a href="src/pages/request-lifecycle.html" data-i18n="pages.compaction.foot">Full request lifecycle stepper →</a></footer>
 
+<script src="js/cc-upstream-map.js"></script>
+<script src="js/arch-hotspot.js"></script>
 <script src="js/i18n.js"></script>
+<script src="js/compaction-lab.js"></script>
 <script>
-(function(){
-  var THRESH = 85;
-  var fill = document.getElementById("fill");
-  var num = document.getElementById("num");
-  var bar = document.getElementById("bar");
-  var state = document.getElementById("state");
-
-  var EN_BELOW = "<strong>Below threshold.</strong> Full message history stays in the prompt. Token cost still compounds each turn — watch the lifecycle page token chart.";
-  var EN_ABOVE = "<strong>Compaction path.</strong> Harness summarizes older turns into a structured block (task spec, progress, open questions). Checkpoints may be written to disk before summarization.";
-
-  function render(){
-    var v = +fill.value;
-    num.textContent = String(v);
-    bar.style.width = v + "%";
-    var zh = window.__I18N_COMPACT;
-    var useZh = zh && document.documentElement.lang === "zh-Hans";
-    if (v < THRESH) {
-      state.className = "state";
-      state.innerHTML = useZh ? zh.below : EN_BELOW;
-    } else {
-      state.className = "state compact";
-      state.innerHTML = useZh ? zh.above : EN_ABOVE;
-    }
-  }
-  fill.addEventListener("input", render);
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(render, 0);
-  });
-  render();
-})();
+  if (typeof initArchHotspots === "function") initArchHotspots(document);
 </script>
 </body>
 </html>

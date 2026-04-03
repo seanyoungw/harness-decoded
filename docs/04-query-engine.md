@@ -1,5 +1,7 @@
 # Query Engine Internals: Backpressure, Retry, and Response Caching
 
+> **简体中文：** [查询引擎](zh/04-query-engine.md)
+
 > The module that "just calls the API" is 46,000 lines. Here's why.
 
 ---

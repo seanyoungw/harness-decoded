@@ -39,6 +39,19 @@
     overflow-x: hidden;
   }
 
+  /* Body copy links — match violet/teal palette, not default blue */
+  a:not(.btn):not(.nav-logo) {
+    color: var(--purple2);
+    text-decoration: underline;
+    text-decoration-color: rgba(167, 139, 250, 0.38);
+    text-underline-offset: 0.18em;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+  a:not(.btn):not(.nav-logo):hover {
+    color: var(--teal);
+    text-decoration-color: rgba(45, 212, 191, 0.55);
+  }
+
   /* ── NOISE OVERLAY ── */
   body::before {
     content: '';
@@ -500,7 +513,16 @@
     line-height: 2;
   }
 
-  footer a { color: var(--purple2); text-decoration: none; }
+  footer a {
+    color: var(--purple2);
+    text-decoration: underline;
+    text-decoration-color: rgba(167, 139, 250, 0.35);
+    text-underline-offset: 0.18em;
+  }
+  footer a:hover {
+    color: var(--teal);
+    text-decoration-color: rgba(45, 212, 191, 0.5);
+  }
 
   /* ── ANIMATIONS ── */
   @keyframes fadeUp {
@@ -550,10 +572,10 @@
 <div class="hero" style="padding-top:6rem;">
   <div class="hero-glow"></div>
   <p class="eyebrow" data-i18n="hero.eyebrow">Claude Code Architecture · Decoded</p>
-  <h1 data-i18n-html="true" data-i18n="hero.h1">The <span>harness</span><br>not the model</h1>
+  <h1 data-i18n-html="true" data-i18n="hero.h1">The <span>harness</span><br>not only the model</h1>
   <p class="hero-sub" data-i18n-html="true" data-i18n="hero.sub">
     The March 2026 source leak revealed something profound:
-    <strong>Claude Code's innovation isn't the AI — it's the execution framework around it.</strong>
+    <strong>an enormous amount of engineering sits in the execution framework around the model.</strong>
     512,000 lines. 40+ tools. A memory daemon. A stealth commit mode.
     This is the architecture, decoded.
   </p>
@@ -576,6 +598,7 @@
     <p class="section-label" data-i18n="arch.label">Core Architecture</p>
     <h2 class="section-title" data-i18n="arch.title">The Harness: Five Layers</h2>
     <p class="section-desc" data-i18n="arch.desc">Click any layer to expand its internals. The model sits below all five — it's one component, not the system.</p>
+    <p class="section-desc" data-i18n-html="true" data-i18n="arch.officialRepo">The public <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener">anthropics/claude-code</a> repo is plugins, examples, <code>.claude</code> commands, and scripts — not a full browsable dump of the shipped CLI. Install via <a href="https://code.claude.com/docs/en/setup" target="_blank" rel="noopener">official installers</a>; see the <a href="https://code.claude.com/docs/en/overview" target="_blank" rel="noopener">product overview</a>. Module line counts in the layers are community-scale estimates from leak-era discussion, not file counts from that GitHub tree — <a href="https://github.com/seanyoungw/harness-decoded/blob/main/docs/methodology.md" target="_blank" rel="noopener">methodology</a>.</p>
 
     <div class="harness-stack">
 
@@ -744,7 +767,7 @@
 <section id="findings" style="padding:6rem 2rem;max-width:1100px;margin:0 auto;">
   <p class="section-label" data-i18n="find.label">From the Leaked Source</p>
   <h2 class="section-title" data-i18n="find.title">What we learned</h2>
-  <p class="section-desc" data-i18n="find.desc">Key architectural facts that emerged from the March 2026 source map leak.</p>
+  <p class="section-desc" data-i18n="find.desc">Key architectural facts from the March 2026 source map leak and follow-on discussion. Figures like ~46K / ~29K LOC are community scale estimates — not file counts from the public anthropics/claude-code tree.</p>
 
   <div class="findings-grid">
 

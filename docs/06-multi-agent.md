@@ -1,5 +1,7 @@
 # Multi-Agent Patterns: Fan-Out, Gather, and Swarm
 
+> **简体中文：** [多智能体模式](zh/06-multi-agent.md)
+
 > When one agent isn't enough — and when it is.
 
 ---

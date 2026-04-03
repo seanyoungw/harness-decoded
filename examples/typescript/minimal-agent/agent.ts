@@ -184,7 +184,7 @@ class ToolRegistry {
     return [...this.tools.values()].map((t) => ({
       name: t.name,
       description: t.description,
-      input_schema: t.inputSchema,
+      input_schema: t.inputSchema as Anthropic.Tool["input_schema"],
     }));
   }
 }

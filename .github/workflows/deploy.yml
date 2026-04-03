@@ -12,8 +12,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # Publish repo root so /docs, /examples resolve from website/*.html via ../docs and ../examples
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website
+          publish_dir: .

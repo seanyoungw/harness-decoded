@@ -17,9 +17,33 @@ This is the full production harness implementation.
 - Graceful shutdown handling
 - Docker + docker-compose deployment config
 
-## Status
+## Run
 
-Coming soon. Track progress in [GitHub Issues](https://github.com/YOUR_USERNAME/harness-decoded/issues).
+```bash
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...
+python agent.py "your task"
+python agent.py --swarm "exploratory multi-agent task"
+python agent.py --health
+```
 
-Want to contribute? The Level 3 implementation is a great first PR.
-See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+## Demo scenarios
+
+| Feature | How to see it |
+|---------|----------------|
+| Chained audit | `.harness/audit.jsonl` lines include `prevHash` and `hash`; integrity check runs on `--health` |
+| Project memory | After sessions with checkpoints, `.harness/memory.json` may be updated by `run_kairos` (async after `end_turn`) |
+| Swarm | `--swarm` — root agent + dynamic `spawn_subagent` up to `MAX_SWARM_AGENTS` |
+| Tracing | `Tracer` spans wrap LLM and tool calls (exportable structure) |
+
+## TypeScript twin
+
+[`examples/typescript/production-agent`](../../typescript/production-agent) — same flags: `--health`, `--swarm`, `--parallel`.
+
+## Animations
+
+[`website/principles.html`](../../../website/principles.html), [`website/kairos.html`](../../../website/kairos.html)
+
+## Contributing
+
+[CONTRIBUTING.md](../../CONTRIBUTING.md)

@@ -1,6 +1,6 @@
 # harness-decoded
 
-> **The Claude Code source leak taught us something profound: the real innovation wasn't the model. It was the harness.**
+> **The Claude Code source leak taught us something profound: an enormous amount of engineering sits in the execution framework around the model.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -32,6 +32,16 @@ This repository decodes that architecture — visually, technically, and practic
 | **Understand** | Read the leaked source, understand every design decision | [`docs/01-architecture.md`](docs/01-architecture.md) |
 | **Learn** | Internalize the Harness pattern, apply it to your own systems | [`docs/02-harness-vs-wrapper.md`](docs/02-harness-vs-wrapper.md) |
 | **Build** | Implement a production-grade agent from scratch | [`examples/`](examples/) → [`docs/07-build-guide.md`](docs/07-build-guide.md) |
+| **中文导读** | 快速路线与术语对照 | [`docs/README-zh.md`](docs/README-zh.md) |
+
+---
+
+## Teaching path (docs ↔ code ↔ visuals)
+
+1. Skim [`docs/00-code-map.md`](docs/00-code-map.md) — every doc section points at Python/TS files and website pages.  
+2. Read [`docs/methodology.md`](docs/methodology.md) — what is reconstructed vs publicly discussed.  
+3. Optional drills: [`docs/exercises.md`](docs/exercises.md), [`docs/anti-patterns.md`](docs/anti-patterns.md), [`docs/decision-tree.md`](docs/decision-tree.md).  
+4. Open [`website/principles.html`](website/principles.html) for loop / permission / compaction / fan-out **animations** (no API key).
 
 ---
 
@@ -39,14 +49,16 @@ This repository decodes that architecture — visually, technically, and practic
 
 The fastest way to understand the architecture is visually. Open [`website/index.html`](website/index.html) in your browser — no build step required.
 
-**7 interactive pages:**
-- **Request Lifecycle** — step through a single agent request frame by frame
-- **Tool System** — click any tool, trace its permission chain and execution path
-- **Context Compaction** — drag a slider, watch the memory system handle overflow
-- **Multi-Agent Orchestration** — visualize fan-out, gather, and swarm patterns
-- **KAIROS + autoDream** — the background daemon timeline, annotated
-- **Undercover Mode** — the stealth commit flow decoded
-- **Architecture Playground** — drag-and-drop your own agent, export scaffolding code
+**Local preview:** `cd website && npm start`, then open **http://127.0.0.1:5173/** (plain **HTTP**). If the browser says “invalid response,” you are almost certainly on **https://** — change the URL to **http://**. Alternative: `cd website && npm run start:py` (same port, Python only).
+
+**Key pages:**
+- **[Principles (animated)](website/principles.html)** — agent loop, permission gate, compaction, fan-out (pedagogical, matches example code)
+- **[Compaction lab](website/compaction.html)** — slider vs ~85% threshold
+- **[Request Lifecycle](website/src/pages/request-lifecycle.html)** — stepper + token tracker
+- **[Tool System](website/src/pages/tool-system.html)** — tools + Undercover section
+- **[Multi-Agent](website/src/pages/multi-agent.html)** — fan-out / swarm visuals
+- **[KAIROS + autoDream](website/kairos.html)** — background daemon timeline
+- **[Architecture Playground](website/playground.html)** — drag-and-drop scaffolding
 
 ---
 
@@ -96,10 +108,37 @@ npx ts-node agent.ts "list all TODO comments in this codebase"
 ```
 
 ### Level 2 — Standard (~800 lines)
-Adds Memory System and Multi-Agent orchestration. Extensible tool plugin interface.
+Adds memory compaction, audit log, parallel fan-out, richer tools. See each folder `README.md` for **demo scenarios** (what to run and what you should observe).
+
+```bash
+# Python
+cd examples/python/standard_agent && pip install -r requirements.txt
+python agent.py "summarize this repo README"
+python agent.py --parallel "list top-level concerns per subdirectory"
+
+# TypeScript
+cd examples/typescript/standard-agent && npm install
+npx ts-node agent.ts "summarize this repo README"
+```
 
 ### Level 3 — Production
-Full Harness architecture. KAIROS-inspired background processing, audit logging, deployment configs.
+Full harness checklist: chained audit, KAIROS-style consolidation, swarm, health check, extra tools (`patch_file`, `web_fetch`, `git_read`). **Python and TypeScript** both implement the same CLI flags.
+
+```bash
+# Python
+cd examples/python/production_agent && pip install -r requirements.txt
+python agent.py "your task"
+python agent.py --swarm "your exploratory task"
+python agent.py --health
+
+# TypeScript
+cd examples/typescript/production-agent && npm install
+npx ts-node agent.ts "your task"
+npx ts-node agent.ts --swarm "your exploratory task"
+npx ts-node agent.ts --health
+```
+
+Docker (Python): see `examples/python/production_agent/docker-compose.yml`.
 
 ---
 
@@ -107,6 +146,12 @@ Full Harness architecture. KAIROS-inspired background processing, audit logging,
 
 | Doc | Topic | Depth |
 |-----|-------|-------|
+| [00 — Code map](docs/00-code-map.md) | Docs ↔ examples ↔ animation pages | ★★★★☆ |
+| [Methodology](docs/methodology.md) | Evidence vs teaching reconstruction | ★★★★☆ |
+| [Glossary](docs/glossary.md) | Terms (+ brief 中文列) | ★★★☆☆ |
+| [Exercises](docs/exercises.md) | Self-check drills | ★★★☆☆ |
+| [Anti-patterns](docs/anti-patterns.md) | Wrapper mistakes + harness fixes | ★★★★☆ |
+| [Decision tree](docs/decision-tree.md) | Wrapper vs Level 1–3 | ★★★☆☆ |
 | [01 — Architecture Overview](docs/01-architecture.md) | Full system map with annotated source references | ★★★★☆ |
 | [02 — Harness vs Wrapper](docs/02-harness-vs-wrapper.md) | The philosophical and engineering differences | ★★★★★ |
 | [03 — Tool Permission System](docs/03-tool-system.md) | Sandbox design, audit trails, revocation | ★★★★☆ |
@@ -139,6 +184,8 @@ Things the community discovered that informed this repo:
 - **MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3** — a single comment revealing that 1,279 sessions had 50+ consecutive failures daily before this fix
 
 > Disclaimer: This repo contains no leaked source code. All examples are original implementations inspired by architectural patterns discussed publicly after the leak.
+
+The **46K / ~29K** figures are **community-scale estimates** from that discourse ([methodology](docs/methodology.md)); they are **not** obtained by counting files in the public [anthropics/claude-code](https://github.com/anthropics/claude-code) tree.
 
 ---
 

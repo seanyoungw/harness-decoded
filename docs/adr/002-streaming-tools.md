@@ -1,5 +1,7 @@
 # ADR-002: Synchronous vs Streaming Tool Execution
 
+> **简体中文：** [ADR-002（中文）](zh/adr/002-streaming-tools.md)
+
 **Status**: Accepted  
 **Date**: 2024-01
 

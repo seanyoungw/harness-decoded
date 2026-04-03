@@ -1,5 +1,7 @@
 # Production Build Guide: From Design Decisions to Deployment
 
+> **简体中文：** [生产构建指南](zh/07-build-guide.md)
+
 > Everything you need to ship a production-grade agent harness. Checklists included.
 
 ---

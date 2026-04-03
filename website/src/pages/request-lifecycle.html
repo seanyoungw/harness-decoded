@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Request Lifecycle — harness-decoded</title>
+<title data-i18n="pages.requestLifecycle.docTitle">Request Lifecycle — harness-decoded</title>
 <script src="../../js/site-base.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
@@ -76,6 +76,7 @@
   .ctrl-btn.primary{background:var(--purple);border-color:var(--purple);color:#fff;}
   .ctrl-btn.primary:hover{background:var(--purple2);}
   .step-counter{font-size:12px;color:var(--muted);min-width:80px;text-align:center;}
+  .sr-i18n-ref{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
   /* token tracker */
   .tracker-section{max-width:900px;margin:0 auto;padding:4rem 2rem;}
@@ -108,9 +109,14 @@
 </nav>
 
 <div class="hero">
-  <p class="eyebrow">Request Lifecycle · Interactive</p>
-  <h1>One message.<br><em>Eight layers</em>.</h1>
-  <p class="hero-desc">Step through a single agent request frame by frame. See exactly which layer handles what, what state changes, and what tokens accumulate at each step.</p>
+  <p class="eyebrow" data-i18n="pages.requestLifecycle.eyebrow">Request Lifecycle · Interactive</p>
+  <h1 data-i18n-html="true" data-i18n="pages.requestLifecycle.h1">One message.<br><em>Eight layers</em>.</h1>
+  <p class="hero-desc" data-i18n="pages.requestLifecycle.heroDesc">Step through a single agent request frame by frame. See exactly which layer handles what, what state changes, and what tokens accumulate at each step.</p>
+</div>
+
+<div class="sr-i18n-ref" aria-hidden="true">
+  <span data-i18n="pages.requestLifecycle.codeLabel">Code</span>
+  <span data-i18n="pages.requestLifecycle.stateHeader">State snapshot</span>
 </div>
 
 <!-- STEPPER -->
@@ -119,53 +125,53 @@
     <div class="progress-bar" id="prog-bar"></div>
     <div id="steps-container"></div>
     <div class="nav-controls">
-      <button class="ctrl-btn" id="btn-prev" onclick="step(-1)" disabled>← prev</button>
+      <button class="ctrl-btn" id="btn-prev" onclick="step(-1)" disabled data-i18n="pages.requestLifecycle.btnPrev">← prev</button>
       <span class="step-counter" id="step-counter">1 / 8</span>
-      <button class="ctrl-btn primary" id="btn-next" onclick="step(1)">next →</button>
+      <button class="ctrl-btn primary" id="btn-next" onclick="step(1)" data-i18n="pages.requestLifecycle.btnNext">next →</button>
     </div>
   </div>
 </div>
 
 <!-- TOKEN TRACKER -->
 <div class="tracker-section">
-  <p class="section-label">Token accumulation</p>
-  <h2 class="section-title">Where the tokens go</h2>
-  <p class="section-desc">A typical 10-iteration session. Each LLM call includes the full context — token cost compounds. This is why compaction matters.</p>
+  <p class="section-label" data-i18n="pages.requestLifecycle.trackLabel">Token accumulation</p>
+  <h2 class="section-title" data-i18n="pages.requestLifecycle.trackTitle">Where the tokens go</h2>
+  <p class="section-desc" data-i18n="pages.requestLifecycle.trackDesc">A typical 10-iteration session. Each LLM call includes the full context — token cost compounds. This is why compaction matters.</p>
   <div class="token-rows">
     <div class="token-row">
-      <div class="token-event">System prompt</div>
+      <div class="token-event" data-i18n="pages.requestLifecycle.tok1n">System prompt</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:3%;background:var(--purple)"></div></div>
-      <div class="token-count">~2,000 tok</div>
+      <div class="token-count" data-i18n="pages.requestLifecycle.tok1c">~2,000 tok</div>
     </div>
     <div class="token-row">
-      <div class="token-event">Memory prefix (KAIROS)</div>
+      <div class="token-event" data-i18n="pages.requestLifecycle.tok2n">Memory prefix (KAIROS)</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:6%;background:var(--teal)"></div></div>
-      <div class="token-count">~3,800 tok</div>
+      <div class="token-count" data-i18n="pages.requestLifecycle.tok2c">~3,800 tok</div>
     </div>
     <div class="token-row">
-      <div class="token-event">User task</div>
+      <div class="token-event" data-i18n="pages.requestLifecycle.tok3n">User task</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:1%;background:var(--blue)"></div></div>
-      <div class="token-count">~150 tok</div>
+      <div class="token-count" data-i18n="pages.requestLifecycle.tok3c">~150 tok</div>
     </div>
     <div class="token-row">
-      <div class="token-event">10× tool calls + results</div>
+      <div class="token-event" data-i18n="pages.requestLifecycle.tok4n">10× tool calls + results</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:32%;background:var(--amber)"></div></div>
-      <div class="token-count">~18,000 tok</div>
+      <div class="token-count" data-i18n="pages.requestLifecycle.tok4c">~18,000 tok</div>
     </div>
     <div class="token-row">
-      <div class="token-event">10× LLM responses</div>
+      <div class="token-event" data-i18n="pages.requestLifecycle.tok5n">10× LLM responses</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:14%;background:var(--coral)"></div></div>
-      <div class="token-count">~8,000 tok</div>
+      <div class="token-count" data-i18n="pages.requestLifecycle.tok5c">~8,000 tok</div>
     </div>
     <div class="token-row" style="background:var(--bg2);">
-      <div class="token-event" style="font-weight:500;color:var(--text);">Total (no compaction)</div>
+      <div class="token-event" style="font-weight:500;color:var(--text);" data-i18n="pages.requestLifecycle.tok6n">Total (no compaction)</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:56%;background:var(--green)"></div></div>
-      <div class="token-count" style="color:var(--green);">~31,950 tok</div>
+      <div class="token-count" style="color:var(--green);" data-i18n="pages.requestLifecycle.tok6c">~31,950 tok</div>
     </div>
     <div class="token-row" style="background:rgba(45,212,191,.04);">
-      <div class="token-event" style="color:var(--teal);">After autoCompact</div>
+      <div class="token-event" style="color:var(--teal);" data-i18n="pages.requestLifecycle.tok7n">After autoCompact</div>
       <div class="token-bar-wrap"><div class="token-bar" style="width:12%;background:var(--teal)"></div></div>
-      <div class="token-count" style="color:var(--teal);">~6,500 tok  (-80%)</div>
+      <div class="token-count" style="color:var(--teal);" data-i18n="pages.requestLifecycle.tok7c">~6,500 tok  (-80%)</div>
     </div>
   </div>
 </div>
@@ -174,258 +180,124 @@
   <p data-i18n-html="true" data-i18n="pages.requestLifecycle.foot"><a href="../../index.html">harness-decoded</a> · <a href="../../../docs/01-architecture.md">Architecture →</a> · <a href="../../principles.html">Animations →</a></p>
 </footer>
 
+<script src="../../js/request-lifecycle-data.js"></script>
 <script src="../../js/i18n.js"></script>
 <script>
-const STEPS = [
-  {
-    num: "01", layer: "IDE Bridge", layerColor: "#f97316",
-    title: "User input received",
-    desc: "The IDE extension or terminal UI captures the user's message, active file context, cursor position, and any selected text. This is serialized into a structured TaskObject — not a raw string.",
-    callout: "The bridge is intentionally thin. It serializes intent but makes zero AI decisions. This is why the harness is testable headlessly — the bridge can be replaced with a test fixture.",
-    calloutColor: "#f97316",
-    code: `<span class="cm"># IDE Bridge: serialize user intent</span>
-task = <span class="fn">TaskObject</span>(
-  prompt=<span class="st">"refactor auth module to use RS256"</span>,
-  active_file=<span class="st">"src/auth.py"</span>,
-  cursor_line=<span class="num">42</span>,
-  selection=<span class="hl">None</span>,
-  workspace_root=Path(<span class="st">"/home/user/myproject"</span>),
-)`,
-    state: [
-      {k:"session_id", v:"abc123", cls:"new"},
-      {k:"iteration", v:"0", cls:""},
-      {k:"messages", v:"0", cls:""},
-      {k:"tokens (est)", v:"0", cls:""},
-    ]
-  },
-  {
-    num: "02", layer: "Multi-Agent Orchestrator", layerColor: "#8b5cf6",
-    title: "Task decomposition",
-    desc: "The orchestrator estimates task complexity. Simple tasks route to a single agent. Tasks exceeding ~15 estimated iterations trigger fan-out or swarm strategies.",
-    callout: "Complexity estimation uses heuristics: task length, number of files mentioned, presence of words like 'all', 'every', 'entire'. False positives are cheap — single-agent fallback is always available.",
-    calloutColor: "#8b5cf6",
-    code: `<span class="kw">if</span> orchestrator.<span class="fn">estimate_complexity</span>(task) > <span class="num">15</span>:
-    subtasks = orchestrator.<span class="fn">decompose</span>(task)
-    <span class="cm"># fan-out: spawn parallel subagents</span>
-    results = <span class="kw">await</span> <span class="fn">parallel_fan_out</span>(
-        subtasks, harness_factory,
-        max_concurrency=<span class="num">4</span>
-    )
-<span class="kw">else</span>:
-    <span class="cm"># single agent handles it</span>
-    result = <span class="kw">await</span> harness.<span class="fn">run</span>(task)`,
-    state: [
-      {k:"session_id", v:"abc123", cls:""},
-      {k:"strategy", v:"single-agent", cls:"new"},
-      {k:"estimated iters", v:"~8", cls:"new"},
-      {k:"tokens (est)", v:"0", cls:""},
-    ]
-  },
-  {
-    num: "03", layer: "Memory System", layerColor: "#2dd4bf",
-    title: "Context loaded from KAIROS",
-    desc: "The memory system reads the consolidated memory store from the previous KAIROS run. Known facts, patterns, and open questions are injected as a context prefix. The agent starts informed, not blank.",
-    callout: "On a mature project with 50+ sessions of KAIROS history, the memory prefix can save dozens of tool calls per session. The agent already knows which files change frequently, which tests are flaky, which APIs have gotchas.",
-    calloutColor: "#2dd4bf",
-    code: `memory = <span class="fn">MemorySystem</span>.<span class="fn">load</span>(
-  project_dir / <span class="st">".harness/memory.json"</span>
-)
-<span class="cm"># Injects consolidated knowledge as context prefix</span>
-prefix = memory.<span class="fn">to_context_string</span>()
-messages = [
-  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prefix},
-  {<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: <span class="st">"Noted."</span>},
-  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: task.prompt},
-]`,
-    state: [
-      {k:"session_id", v:"abc123", cls:""},
-      {k:"messages", v:"3", cls:"changing"},
-      {k:"memory facts", v:"12", cls:"new"},
-      {k:"tokens (est)", v:"~4,200", cls:"changing"},
-    ]
-  },
-  {
-    num: "04", layer: "Query Engine", layerColor: "#60a5fa",
-    title: "LLM call with streaming",
-    desc: "The query engine sends the messages and tool definitions to the Anthropic API. Response streams token-by-token. Tool call arguments are assembled incrementally. Token usage is tracked against the session budget.",
-    callout: "The Query Engine is 46K lines. Streaming pipeline, backpressure, retry logic for 429/529/500/503, token accounting, response caching, model routing. 'Just calling an API' has a lot of surface area.",
-    calloutColor: "#60a5fa",
-    code: `<span class="cm"># QueryEngine.call() — with retry</span>
-<span class="kw">for</span> attempt <span class="kw">in</span> range(<span class="num">5</span>):
-    <span class="kw">try</span>:
-        response = <span class="kw">await</span> client.messages.<span class="fn">create</span>(
-            model=<span class="st">"claude-opus-4-6"</span>,
-            messages=messages, tools=tools,
-            max_tokens=<span class="num">4096</span>
-        )
-        trace.total_input_tokens += response.usage.input_tokens
-        <span class="kw">return</span> response
-    <span class="kw">except</span> RateLimitError:
-        <span class="kw">await</span> asyncio.<span class="fn">sleep</span>(<span class="num">2</span> ** attempt * jitter)`,
-    state: [
-      {k:"iteration", v:"1", cls:"changing"},
-      {k:"stop_reason", v:"tool_use", cls:"new"},
-      {k:"input tokens", v:"+2,341", cls:"changing"},
-      {k:"output tokens", v:"+612", cls:"changing"},
-    ]
-  },
-  {
-    num: "05", layer: "Tool System", layerColor: "#f59e0b",
-    title: "Tool call execution",
-    desc: "The agent decided to call read_file. The tool system runs the 7-step gauntlet: lookup → schema validation → permission check → approval gate → sandboxed execution → error classification → audit log.",
-    callout: "This step can repeat many times within a single iteration if the model requests multiple tool calls. Each tool call is independent — failure of one does not abort the others.",
-    calloutColor: "#f59e0b",
-    code: `<span class="kw">for</span> block <span class="kw">in</span> response.content:
-    <span class="kw">if</span> block.type != <span class="st">"tool_use"</span>: <span class="kw">continue</span>
+function wantsZh() {
+  var q = new URLSearchParams(location.search).get("lang");
+  if (q === "zh" || q === "en") return q === "zh";
+  try {
+    return localStorage.getItem("harness-lang") === "zh";
+  } catch (e) {
+    return false;
+  }
+}
 
-    tool = registry.<span class="fn">get</span>(block.name)
-    <span class="cm"># 7-step gauntlet runs here</span>
-    result = <span class="kw">await</span> tool.<span class="fn">execute</span>(
-        block.input,
-        permissions=session.permissions,
-        audit=audit_log,
-        session_id=trace.session_id,
-    )
-    tool_results.<span class="fn">append</span>(result)`,
-    state: [
-      {k:"tool", v:"read_file", cls:"new"},
-      {k:"duration", v:"12ms", cls:"new"},
-      {k:"permission", v:"FS_READ ✓", cls:"new"},
-      {k:"audit entries", v:"1", cls:"changing"},
-    ]
-  },
-  {
-    num: "06", layer: "Memory System", layerColor: "#2dd4bf",
-    title: "Compaction threshold check",
-    desc: "After each iteration, the memory system estimates the current token count. If it exceeds 85% of the context window, autoCompact triggers: checkpoint raw messages → LLM-powered summarization → replace with summary.",
-    callout: "The MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3 guard is critical. Before this was added, 1,279 sessions/day burned ~250K API calls in a compaction failure loop.",
-    calloutColor: "#2dd4bf",
-    code: `messages = <span class="kw">await</span> memory.<span class="fn">maybe_compact</span>(messages)
-
-<span class="cm"># Inside maybe_compact:</span>
-<span class="kw">if</span> estimated_tokens > context_limit * <span class="num">0.85</span>:
-    <span class="kw">if</span> self._failures >= MAX_CONSECUTIVE_FAILURES:
-        <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="st">"autoCompact gave up"</span>)
-    self.<span class="fn">_checkpoint</span>(messages)    <span class="cm"># save raw to disk</span>
-    summary = <span class="kw">await</span> self.<span class="fn">_compact</span>(messages)
-    <span class="kw">return</span> [summary_message]      <span class="cm"># replace history</span>`,
-    state: [
-      {k:"tokens (est)", v:"~18,400", cls:""},
-      {k:"threshold", v:"153,000", cls:""},
-      {k:"compaction", v:"not triggered", cls:""},
-      {k:"consecutive fails", v:"0", cls:""},
-    ]
-  },
-  {
-    num: "07", layer: "Agent Loop", layerColor: "#8b5cf6",
-    title: "Iterate until complete",
-    desc: "Steps 4–6 repeat until the model returns stop_reason='end_turn' (task complete) or max_iterations is reached. Approval gates pause the loop when destructive operations are detected.",
-    callout: "The max_iterations guard (default: 50) is not just a safety feature — it's load management. Without it, a confused agent burns API budget indefinitely. The error message is surfaced to the user, not swallowed.",
-    calloutColor: "#8b5cf6",
-    code: `<span class="kw">while</span> trace.iterations < self.max_iterations:
-    trace.iterations += <span class="num">1</span>
-
-    response = <span class="kw">await</span> qe.<span class="fn">call</span>(messages, ...)
-
-    <span class="kw">if</span> response.stop_reason == <span class="st">"end_turn"</span>:
-        <span class="kw">return</span> <span class="fn">extract_text</span>(response), trace
-
-    <span class="cm"># execute tools, update messages, check compaction</span>
-    ...
-
-<span class="cm"># Reached only on iteration limit</span>
-<span class="kw">return</span> <span class="st">"[max iterations reached]"</span>, trace`,
-    state: [
-      {k:"iteration", v:"1 → 7", cls:"changing"},
-      {k:"tool calls", v:"14 total", cls:"changing"},
-      {k:"tokens used", v:"~28,400", cls:"changing"},
-      {k:"compactions", v:"0", cls:""},
-    ]
-  },
-  {
-    num: "08", layer: "IDE Bridge", layerColor: "#f97316",
-    title: "Result surfaces to IDE",
-    desc: "The final response is sent back through the IDE Bridge. Diffs are shown for preview before any file writes are applied. The KAIROS daemon is queued to consolidate the session transcript on next idle.",
-    callout: "KAIROS is queued, not awaited. The user gets their result immediately. KAIROS runs in a forked subprocess after the session ends — it can fail completely without affecting the user experience.",
-    calloutColor: "#f97316",
-    code: `<span class="cm"># Session complete — surface result</span>
-bridge.<span class="fn">show_result</span>(final_text)
-
-<span class="cm"># Queue KAIROS (forked, non-blocking)</span>
-asyncio.create_subprocess_exec(
-    sys.executable, <span class="st">"-m"</span>, <span class="st">"harness.kairos"</span>,
-    str(session_dir),
-    <span class="cm"># exits independently — no await</span>
-)
-
-trace.<span class="fn">summary</span>()
-<span class="cm"># iterations: 7, tokens: 28,400</span>
-<span class="cm"># tool calls: 14, cost: $0.043</span>`,
-    state: [
-      {k:"status", v:"complete", cls:"new"},
-      {k:"total iterations", v:"7", cls:""},
-      {k:"total tokens", v:"28,400", cls:""},
-      {k:"est. cost", v:"$0.043", cls:""},
-    ]
-  },
-];
+function getSteps() {
+  if (wantsZh() && window.LIFECYCLE_STEPS_ZH) return window.LIFECYCLE_STEPS_ZH;
+  return window.LIFECYCLE_STEPS_EN || [];
+}
 
 let current = 0;
 
-function render() {
-  const container = document.getElementById('steps-container');
-  const progBar = document.getElementById('prog-bar');
-  const counter = document.getElementById('step-counter');
+function labelCode() {
+  var el = document.querySelector(".sr-i18n-ref [data-i18n=\"pages.requestLifecycle.codeLabel\"]");
+  return el && el.textContent ? el.textContent : "Code";
+}
+function labelState() {
+  var el = document.querySelector(".sr-i18n-ref [data-i18n=\"pages.requestLifecycle.stateHeader\"]");
+  return el && el.textContent ? el.textContent : "State snapshot";
+}
 
-  container.innerHTML = '';
-  progBar.innerHTML = '';
+function render() {
+  const STEPS = getSteps();
+  if (!STEPS.length) return;
+  current = Math.min(current, STEPS.length - 1);
+  const container = document.getElementById("steps-container");
+  const progBar = document.getElementById("prog-bar");
+  const counter = document.getElementById("step-counter");
+
+  container.innerHTML = "";
+  progBar.innerHTML = "";
 
   STEPS.forEach((s, i) => {
-    const dot = document.createElement('div');
-    dot.className = 'prog-dot' + (i < current ? ' done' : i === current ? ' active' : '');
-    dot.onclick = () => { current = i; render(); };
+    const dot = document.createElement("div");
+    dot.className = "prog-dot" + (i < current ? " done" : i === current ? " active" : "");
+    dot.onclick = () => {
+      current = i;
+      render();
+    };
     progBar.appendChild(dot);
   });
 
   const s = STEPS[current];
-  const panel = document.createElement('div');
-  panel.className = 'step-panel active';
-  panel.innerHTML = `
-    <div class="step-left">
-      <div class="step-num" style="color:${s.layerColor}33">${s.num}</div>
-      <div class="step-layer" style="color:${s.layerColor}">${s.layer}</div>
-      <div class="step-title">${s.title}</div>
-      <div class="step-desc">${s.desc}</div>
-      <div class="step-callout" style="border-color:${s.layerColor}55;background:${s.layerColor}06">
-        ${s.callout}
-      </div>
-    </div>
-    <div class="step-right">
-      <div class="step-code-label">Code</div>
-      <div class="code-box"><code>${s.code}</code></div>
-      <div class="state-box">
-        <div class="state-header">State snapshot</div>
-        ${s.state.map(r => `
-          <div class="state-row">
-            <span class="state-key">${r.k}</span>
-            <span class="state-val ${r.cls}">${r.v}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+  const panel = document.createElement("div");
+  panel.className = "step-panel active";
+  panel.innerHTML =
+    "<div class=\"step-left\">" +
+    '<div class="step-num" style="color:' +
+    s.layerColor +
+    '33">' +
+    s.num +
+    "</div>" +
+    '<div class="step-layer" style="color:' +
+    s.layerColor +
+    '">' +
+    s.layer +
+    "</div>" +
+    '<div class="step-title">' +
+    s.title +
+    "</div>" +
+    '<div class="step-desc">' +
+    s.desc +
+    "</div>" +
+    '<div class="step-callout" style="border-color:' +
+    s.layerColor +
+    "55;background:" +
+    s.layerColor +
+    '06">' +
+    s.callout +
+    "</div></div>" +
+    '<div class="step-right">' +
+    '<div class="step-code-label" data-i18n="pages.requestLifecycle.codeLabel">Code</div>' +
+    '<div class="code-box"><code>' +
+    s.code +
+    "</code></div>" +
+    '<div class="state-box">' +
+    '<div class="state-header" data-i18n="pages.requestLifecycle.stateHeader">State snapshot</div>' +
+    s.state
+      .map(
+        (r) =>
+          '<div class="state-row"><span class="state-key">' +
+          r.k +
+          '</span><span class="state-val ' +
+          r.cls +
+          '">' +
+          r.v +
+          "</span></div>"
+      )
+      .join("") +
+    "</div></div>";
+
   container.appendChild(panel);
 
-  counter.textContent = `${current + 1} / ${STEPS.length}`;
-  document.getElementById('btn-prev').disabled = current === 0;
-  document.getElementById('btn-next').disabled = current === STEPS.length - 1;
+  counter.textContent = current + 1 + " / " + STEPS.length;
+  document.getElementById("btn-prev").disabled = current === 0;
+  document.getElementById("btn-next").disabled = current === STEPS.length - 1;
+
+  panel.querySelector(".step-code-label").textContent = labelCode();
+  panel.querySelector(".state-header").textContent = labelState();
 }
 
 function step(dir) {
+  const STEPS = getSteps();
   current = Math.max(0, Math.min(STEPS.length - 1, current + dir));
   render();
 }
 
+document.addEventListener("i18n-applied", function () {
+  render();
+});
 render();
 </script>
 </body>

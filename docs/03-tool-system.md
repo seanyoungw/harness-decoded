@@ -1,5 +1,7 @@
 # Tool Permission System: Sandbox, Audit, and Revocation
 
+> **简体中文：** [工具权限系统](zh/03-tool-system.md)
+
 > How Claude Code ensures that 40+ tools can execute arbitrary system operations without becoming a security liability.
 
 ---

@@ -1,0 +1,10 @@
+{
+  "name": "harness-decoded-website",
+  "private": true,
+  "description": "Static site. Open http://127.0.0.1:5173 (HTTP only — https will show invalid response).",
+  "scripts": {
+    "start": "npx --yes serve . --listen tcp://127.0.0.1:5173 --no-clipboard",
+    "serve": "npx --yes serve . --listen tcp://127.0.0.1:5173 --no-clipboard",
+    "start:py": "python3 -m http.server 5173 --bind 127.0.0.1"
+  }
+}

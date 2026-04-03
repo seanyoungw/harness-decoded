@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tool Permission System — harness-decoded</title>
+<title data-i18n="pages.toolSystem.docTitle">Tool Permission System — harness-decoded</title>
 <script src="../../js/site-base.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/lang-switch.css">
+<link rel="stylesheet" href="../../css/arch-diagram.css">
 <script type="module" src="../components/index.js"></script>
 <style>
   :root {
@@ -48,6 +49,8 @@
   .step-line{width:1px;flex:1;min-height:16px;background:var(--border2);}
   .flow-card{border:1px solid var(--border);border-radius:8px;background:var(--bg3);padding:1rem 1.25rem;margin-bottom:4px;transition:border-color .2s;}
   .flow-card:hover{border-color:var(--border2);}
+  .flow-card.arch-hotspot{cursor:pointer;}
+  .flow-card.arch-hotspot:focus{outline:2px solid rgba(139,92,246,0.5);outline-offset:2px;}
   .flow-card.pass{border-left:3px solid var(--green);}
   .flow-card.check{border-left:3px solid var(--amber);}
   .flow-card.exec{border-left:3px solid var(--blue);}
@@ -107,23 +110,23 @@
 
 <!-- HERO -->
 <div class="hero-wrap">
-  <p class="eyebrow">Tool System · Deep Dive</p>
-  <h1>29,000 lines<br>to run <em>bash safely</em></h1>
-  <p class="hero-desc">Every tool call passes through a seven-step gauntlet: lookup, schema validation, permission check, approval gate, sandboxed execution, error classification, and audit logging. None of these steps can be skipped.</p>
+  <p class="eyebrow" data-i18n="pages.toolSystem.eyebrow">Tool System · Deep Dive</p>
+  <h1 data-i18n-html="true" data-i18n="pages.toolSystem.h1">29,000 lines<br>to run <em>bash safely</em></h1>
+  <p class="hero-desc" data-i18n="pages.toolSystem.heroDesc">Every tool call passes through a seven-step gauntlet: lookup, schema validation, permission check, approval gate, sandboxed execution, error classification, and audit logging. None of these steps can be skipped.</p>
   <div class="metrics">
-    <metric-badge label="Tools" value="40+" color="amber"></metric-badge>
-    <metric-badge label="Source" value="29K" sub="lines" color="amber"></metric-badge>
-    <metric-badge label="Permissions" value="9" sub="scopes" color="blue"></metric-badge>
-    <metric-badge label="Error kinds" value="7" color="teal"></metric-badge>
+    <metric-badge label="Tools" value="40+" color="amber" data-i18n-label-key="pages.toolSystem.badgeToolsL" data-i18n-value-key="pages.toolSystem.badgeToolsV"></metric-badge>
+    <metric-badge label="Source" value="29K" sub="lines" color="amber" data-i18n-label-key="pages.toolSystem.badgeSrcL" data-i18n-value-key="pages.toolSystem.badgeSrcV" data-i18n-sub-key="pages.toolSystem.badgeSrcS"></metric-badge>
+    <metric-badge label="Permissions" value="9" sub="scopes" color="blue" data-i18n-label-key="pages.toolSystem.badgePermL" data-i18n-value-key="pages.toolSystem.badgePermV" data-i18n-sub-key="pages.toolSystem.badgePermS"></metric-badge>
+    <metric-badge label="Error kinds" value="7" color="teal" data-i18n-label-key="pages.toolSystem.badgeErrL" data-i18n-value-key="pages.toolSystem.badgeErrV"></metric-badge>
   </div>
 </div>
 
 <!-- PERMISSION FLOW -->
 <div class="flow-section">
   <div class="wrap">
-    <p class="section-label">Execution path</p>
-    <h2 class="section-title">Every tool call: 7 steps</h2>
-    <p class="section-desc">This is the single choke point that makes the harness safe. Each step can abort execution before the next begins.</p>
+    <p class="section-label" data-i18n="pages.toolSystem.flowLabel">Execution path</p>
+    <h2 class="section-title" data-i18n="pages.toolSystem.flowTitle">Every tool call: 7 steps</h2>
+    <p class="section-desc" data-i18n="pages.toolSystem.flowDesc">This is the single choke point that makes the harness safe. Each step can abort execution before the next begins. Click a card for upstream docs / examples.</p>
 
     <div class="flow-steps">
 
@@ -132,9 +135,9 @@
           <div class="step-circle" style="background:rgba(96,165,250,.15);color:var(--blue);">1</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card check">
-          <div class="flow-title">Tool lookup</div>
-          <div class="flow-sub">Does this tool exist in the registry? Hard fail if not — the model hallucinated a tool name.</div>
+        <div class="flow-card check arch-hotspot" data-node="tool-step-1" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s1t">Tool lookup</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s1d">Does this tool exist in the registry? Hard fail if not — the model hallucinated a tool name.</div>
           <div class="flow-code"><span class="k">if</span> name <span class="k">not in</span> self._tools:<br>&nbsp;&nbsp;<span class="k">raise</span> <span class="f">KeyError</span>(<span class="s">f"Unknown tool: {name}"</span>)</div>
         </div>
       </div>
@@ -144,9 +147,9 @@
           <div class="step-circle" style="background:rgba(245,158,11,.15);color:var(--amber);">2</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card check">
-          <div class="flow-title">Input schema validation</div>
-          <div class="flow-sub">Args validated against JSON Schema <em>before</em> the tool's execute() is called. The model cannot pass a malformed path to a file tool.</div>
+        <div class="flow-card check arch-hotspot" data-node="tool-step-2" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s2t">Input schema validation</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s2d">Args validated against JSON Schema <em>before</em> the tool's execute() is called. The model cannot pass a malformed path to a file tool.</div>
           <div class="flow-code"><span class="f">jsonschema.validate</span>(args, tool.input_schema)<br><span class="c"># raises ValidationError if args don't match</span></div>
         </div>
       </div>
@@ -156,9 +159,9 @@
           <div class="step-circle" style="background:rgba(248,113,113,.15);color:#f87171;">3</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card check">
-          <div class="flow-title">Permission check</div>
-          <div class="flow-sub">tool.required_permissions must be a subset of session.permissions.granted. Missing permissions → PermissionError, surfaced to agent.</div>
+        <div class="flow-card check arch-hotspot" data-node="tool-step-3" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s3t">Permission check</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s3d">tool.required_permissions must be a subset of session.permissions.granted. Missing permissions → PermissionError, surfaced to agent.</div>
           <div class="flow-code">missing = required - granted<br><span class="k">if</span> missing:<br>&nbsp;&nbsp;<span class="k">raise</span> <span class="f">PermissionError</span>(<span class="s">f"Missing: {missing}"</span>)</div>
         </div>
       </div>
@@ -168,9 +171,9 @@
           <div class="step-circle" style="background:rgba(249,115,22,.15);color:var(--coral);">4</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card check">
-          <div class="flow-title">Approval gate</div>
-          <div class="flow-sub">Destructive patterns (rm -rf, git push --force, DROP TABLE) trigger a pause. User sees the exact command and approves or denies before execution.</div>
+        <div class="flow-card check arch-hotspot" data-node="tool-step-4" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s4t">Approval gate</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s4d">Destructive patterns (rm -rf, git push --force, DROP TABLE) trigger a pause. User sees the exact command and approves or denies before execution.</div>
           <div class="flow-code"><span class="k">if</span> <span class="f">is_destructive</span>(args):<br>&nbsp;&nbsp;approval = <span class="k">await</span> <span class="f">request_approval</span>(tool, args)<br>&nbsp;&nbsp;<span class="k">if not</span> approval.granted: <span class="k">raise</span> PermissionError</div>
         </div>
       </div>
@@ -180,9 +183,9 @@
           <div class="step-circle" style="background:rgba(52,211,153,.15);color:var(--green);">5</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card exec">
-          <div class="flow-title">Sandboxed execution</div>
-          <div class="flow-sub">Tool runs with: cwd restriction, env allowlist (no secrets leaked), hard timeout, output size cap. For shell: no shell=True, explicit env dict.</div>
+        <div class="flow-card exec arch-hotspot" data-node="tool-step-5" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s5t">Sandboxed execution</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s5d">Tool runs with: cwd restriction, env allowlist (no secrets leaked), hard timeout, output size cap. For shell: no shell=True, explicit env dict.</div>
           <div class="flow-code">proc = <span class="k">await</span> asyncio.<span class="f">create_subprocess_shell</span>(<br>&nbsp;&nbsp;command, cwd=sandbox.cwd, env=allowed_env,<br>&nbsp;&nbsp;stdout=PIPE, stderr=STDOUT<br>)</div>
         </div>
       </div>
@@ -192,9 +195,9 @@
           <div class="step-circle" style="background:rgba(139,92,246,.15);color:var(--purple);">6</div>
           <div class="step-line"></div>
         </div>
-        <div class="flow-card pass">
-          <div class="flow-title">Error classification</div>
-          <div class="flow-sub">Not all errors are equal. RETRYABLE (connection drop) vs INPUT_INVALID (bad args) vs FATAL (corrupted state). Agent loop makes informed recovery decisions.</div>
+        <div class="flow-card pass arch-hotspot" data-node="tool-step-6" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s6t">Error classification</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s6d">Not all errors are equal. RETRYABLE (connection drop) vs INPUT_INVALID (bad args) vs FATAL (corrupted state). Agent loop makes informed recovery decisions.</div>
           <div class="flow-code"><span class="c"># RETRYABLE → try again</span><br><span class="c"># INPUT_INVALID → reformulate args</span><br><span class="c"># PERMISSION_DENIED → escalate or abandon</span><br><span class="c"># TIMEOUT → try simpler approach</span></div>
         </div>
       </div>
@@ -203,9 +206,9 @@
         <div class="step-connector">
           <div class="step-circle" style="background:rgba(96,165,250,.15);color:var(--blue);">7</div>
         </div>
-        <div class="flow-card log">
-          <div class="flow-title">Audit log entry</div>
-          <div class="flow-sub">Written before returning the result. Append-only JSONL. Includes: session_id, iteration, tool, full args, result summary, error kind, duration_ms, approval state.</div>
+        <div class="flow-card log arch-hotspot" data-node="tool-step-7" role="button">
+          <div class="flow-title" data-i18n="pages.toolSystem.s7t">Audit log entry</div>
+          <div class="flow-sub" data-i18n="pages.toolSystem.s7d">Written before returning the result. Append-only JSONL. Includes: session_id, iteration, tool, full args, result summary, error kind, duration_ms, approval state.</div>
           <div class="flow-code">audit.<span class="f">write</span>(<span class="f">AuditEntry</span>(<br>&nbsp;&nbsp;session_id, iteration, tool=name,<br>&nbsp;&nbsp;args=args, result_summary=output[:500],<br>&nbsp;&nbsp;duration_ms=elapsed, approved=approval<br>))</div>
         </div>
       </div>
@@ -217,9 +220,9 @@
 <!-- TOOLS GRID -->
 <div class="tools-section">
   <div class="wrap">
-    <p class="section-label">Tool catalog</p>
-    <h2 class="section-title">40+ tools, six categories</h2>
-    <p class="section-desc">Each tool is a typed object, not a function decorator. Schema, permissions, and error handling are part of the type, not scattered across call sites.</p>
+    <p class="section-label" data-i18n="pages.toolSystem.catLabel">Tool catalog</p>
+    <h2 class="section-title" data-i18n="pages.toolSystem.catTitle">40+ tools, six categories</h2>
+    <p class="section-desc" data-i18n="pages.toolSystem.catDesc">Each tool is a typed object, not a function decorator. Schema, permissions, and error handling are part of the type, not scattered across call sites.</p>
 
     <div class="tools-grid">
       <tool-card name="ReadFileTool" permission="FS_READ" risk="low" category="File System">
@@ -265,9 +268,9 @@
 <!-- PERMISSION MATRIX -->
 <div class="matrix-section">
   <div class="wrap">
-    <p class="section-label">Permission matrix</p>
-    <h2 class="section-title">Which tools need what</h2>
-    <p class="section-desc">Permissions are declared, not inferred. This table is generated from tool definitions — it's always accurate.</p>
+    <p class="section-label" data-i18n="pages.toolSystem.matLabel">Permission matrix</p>
+    <h2 class="section-title" data-i18n="pages.toolSystem.matTitle">Which tools need what</h2>
+    <p class="section-desc" data-i18n="pages.toolSystem.matDesc">Permissions are declared, not inferred. This table is generated from tool definitions — it's always accurate.</p>
     <div class="matrix-wrap" style="margin-top:2rem;">
       <table>
         <thead>
@@ -299,9 +302,9 @@
 <!-- UNDERCOVER MODE -->
 <div class="undercover-section">
   <div class="wrap">
-    <p class="section-label">Undercover Mode</p>
-    <h2 class="section-title">Stealth commits for open-source</h2>
-    <p class="section-desc">When the agent detects a public repository, <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--teal);font-size:12px;">undercover.ts</code> activates and scrubs all git operations of internal information.</p>
+    <p class="section-label" data-i18n="pages.toolSystem.ucLabel">Undercover Mode</p>
+    <h2 class="section-title" data-i18n="pages.toolSystem.ucTitle">Stealth commits for open-source</h2>
+    <p class="section-desc" data-i18n-html="true" data-i18n="pages.toolSystem.ucDesc">When the agent detects a public repository, <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--teal);font-size:12px;">undercover.ts</code> activates and scrubs all git operations of internal information.</p>
 
     <div class="uc-grid">
       <div class="uc-pane">
@@ -361,6 +364,11 @@ function detectPublicRepo(cwd: string): boolean {
 <footer>
   <p data-i18n-html="true" data-i18n="pages.toolSystem.foot"><a href="../../index.html">harness-decoded</a> · <a href="../../../docs/03-tool-system.md">Tool system doc →</a> · <a href="../../principles.html">Principles →</a></p>
 </footer>
+<script src="../../js/cc-upstream-map.js"></script>
+<script src="../../js/arch-hotspot.js"></script>
 <script src="../../js/i18n.js"></script>
+<script>
+  if (typeof initArchHotspots === "function") initArchHotspots(document);
+</script>
 </body>
 </html>

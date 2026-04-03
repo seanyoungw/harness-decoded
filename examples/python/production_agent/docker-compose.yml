@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  agent:
+    build: .
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AGENT_MODEL=claude-opus-4-6
+      - MAX_ITERATIONS=50
+      - SESSION_BUDGET=500000
+      - COMPACT_THRESHOLD=0.85
+      - AUDIT_LOG=/data/audit.jsonl
+      - CHECKPOINT_DIR=/data/checkpoints
+      - MEMORY_PATH=/data/memory.json
+      - MAX_SWARM_AGENTS=20
+      - PERMISSIONS=FS_READ,FS_WRITE,SHELL_EXEC
+    volumes:
+      - ./workspace:/workspace       # project files the agent works on
+      - harness-data:/data           # audit log, checkpoints, memory
+    working_dir: /workspace
+    restart: unless-stopped
+
+volumes:
+  harness-data:

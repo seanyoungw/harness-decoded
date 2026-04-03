@@ -51,6 +51,24 @@
       if (el.getAttribute("data-i18n-html") === "true") el.innerHTML = val;
       else el.textContent = val;
     });
+
+    document.querySelectorAll("metric-badge[data-i18n-label-key]").forEach(function (el) {
+      var lk = el.getAttribute("data-i18n-label-key");
+      var vk = el.getAttribute("data-i18n-value-key");
+      var sk = el.getAttribute("data-i18n-sub-key");
+      if (lk) {
+        var lv = get(dict, lk);
+        if (lv != null && lv !== "") el.setAttribute("label", lv);
+      }
+      if (vk) {
+        var vv = get(dict, vk);
+        if (vv != null && vv !== "") el.setAttribute("value", vv);
+      }
+      if (sk) {
+        var sv = get(dict, sk);
+        if (sv != null && sv !== "") el.setAttribute("sub", sv);
+      }
+    });
     document.querySelectorAll("a[data-doc]").forEach(function (el) {
       var name = el.getAttribute("data-doc");
       if (!name) return;
@@ -129,6 +147,9 @@
         applyDict(dict);
         wireRepoLinks();
         updateLangSwitchUI();
+        try {
+          document.dispatchEvent(new Event("i18n-applied"));
+        } catch (e) { /* ignore */ }
       })
       .catch(function () {
         updateLangSwitchUI();

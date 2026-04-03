@@ -1,5 +1,7 @@
 # ADR-003: Memory Compaction Trigger Strategy
 
+> **简体中文：** [ADR-003（中文）](zh/adr/003-compaction-triggers.md)
+
 **Status**: Accepted  
 **Date**: 2024-01
 

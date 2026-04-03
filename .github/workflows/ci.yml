@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  examples-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Python syntax check (examples)
+        run: |
+          python -m py_compile examples/python/minimal_agent/agent.py
+          python -m py_compile examples/python/standard_agent/agent.py
+          python -m py_compile examples/python/production_agent/agent.py
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: TypeScript agents typecheck
+        run: |
+          for d in production-agent standard-agent minimal-agent; do
+            cd examples/typescript/$d
+            npm install
+            npx tsc --noEmit --target ES2022 --module commonjs --esModuleInterop --skipLibCheck agent.ts
+            cd ../../..
+          done

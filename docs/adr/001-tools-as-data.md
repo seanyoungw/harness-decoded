@@ -1,5 +1,7 @@
 # ADR-001: Tools Defined as Data, Not Code
 
+> **简体中文：** [ADR-001（中文）](zh/adr/001-tools-as-data.md)
+
 **Status**: Accepted  
 **Date**: 2024-01  
 **Deciders**: harness-decoded maintainers

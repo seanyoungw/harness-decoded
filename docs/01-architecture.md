@@ -1,6 +1,27 @@
 # Architecture Overview: Claude Code Decoded
 
-> A map of the full system, layer by layer, with references to what the leaked source revealed.
+> **简体中文：** [架构总览](zh/01-architecture.md)
+
+> A **logical** map of the harness, layer by layer. Ground truth for **what ships in public** is [anthropics/claude-code](https://github.com/anthropics/claude-code) plus [official docs](https://code.claude.com/docs/en/overview); quantitative module sizes below follow **post-leak discourse** (see [methodology.md](methodology.md)).
+
+---
+
+## Official repository, shipped product, and this diagram
+
+Anthropic’s public repo **[anthropics/claude-code](https://github.com/anthropics/claude-code)** contains **plugins**, **examples**, **`.claude/`** (slash-style commands and related config), **`scripts/`** / **`Script/`**, CI under **`.github/`**, and similar surfaces — not a full source listing of the distributed `claude` binary. Installation is via curl, Homebrew, WinGet, etc.; see **[setup](https://code.claude.com/docs/en/setup)** and the **[product overview](https://code.claude.com/docs/en/overview)**.
+
+### Mapping public artifacts to harness concepts
+
+| Public artifact (upstream) | Harness idea it reflects |
+|----------------------------|---------------------------|
+| [`plugins/`](https://github.com/anthropics/claude-code/tree/main/plugins) | Extension packs: custom commands, agents, and tool-shaped capabilities |
+| [`examples/`](https://github.com/anthropics/claude-code/tree/main/examples) | Recipes and integration patterns |
+| [`.claude/`](https://github.com/anthropics/claude-code/tree/main/.claude) | Declarative command hooks the product loads at runtime |
+| `scripts/`, `Script/` | Installer and automation glue around the shipped CLI |
+
+### Relation to the five-layer map
+
+The diagram below is a **pedagogical decomposition** (bridge → orchestration → agent loop → query engine ↔ memory & tools → API model). It is consistent with **documented product behavior** and **leak-era architecture discussion**, but **line counts in the figure** (e.g. ~46K / ~29K) are **Tier A/B** — community-scale estimates, **not** file-by-file counts from the public GitHub tree.
 
 ---
 

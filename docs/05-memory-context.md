@@ -1,5 +1,7 @@
 # Memory & Context: autoCompact, KAIROS, and autoDream
 
+> **简体中文：** [内存与上下文](zh/05-memory-context.md)
+
 > The hardest problem in production AI agents is not intelligence — it's memory. Claude Code solves it with three interlocking systems.
 
 ---

@@ -1,5 +1,7 @@
 # Harness vs Wrapper: The Architectural Divide That Separates Production AI from Prototypes
 
+> **简体中文：** [Harness vs Wrapper](zh/02-harness-vs-wrapper.md)
+
 > This is the most important document in this repository. Everything else follows from the distinction made here.
 
 ---
