@@ -26,6 +26,9 @@
   }
 
   function docsPrefix(zh) {
+    if (document.querySelector("base")) {
+      return zh ? "../docs/zh/" : "../docs/";
+    }
     var p = location.pathname;
     if (p.indexOf("/src/pages/") !== -1) return zh ? "../../../docs/zh/" : "../../../docs/";
     return zh ? "../docs/zh/" : "../docs/";

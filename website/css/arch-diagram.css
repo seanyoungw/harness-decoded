@@ -30,8 +30,8 @@
 }
 .arch-hotspot {
   flex: 1 1 120px;
-  min-width: 100px;
-  max-width: 160px;
+  min-width: 108px;
+  max-width: 220px;
   padding: 0.85rem 0.65rem;
   border-radius: 8px;
   border: 1px solid rgba(139, 92, 246, 0.35);

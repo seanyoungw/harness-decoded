@@ -7,7 +7,7 @@
 <script src="../../js/site-base.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../css/lang-switch.css">
+<link rel="stylesheet" href="css/lang-switch.css">
 <style>
   :root {
     --bg:#0a0a0f;--bg2:#11111a;--bg3:#1a1a28;
@@ -97,14 +97,14 @@
 </head>
 <body>
 <nav style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
-  <a href="../../index.html" class="logo">harness<span>-decoded</span></a>
+  <a href="index.html" class="logo">harness<span>-decoded</span></a>
   <div style="display:flex;align-items:center;gap:.75rem;">
     <span class="lang-switch" style="margin-right:.35rem;">
       <button type="button" data-lang="en" aria-label="English">en</button>
       <span class="lang-sep">/</span>
       <button type="button" data-lang="zh" aria-label="简体中文">zh</button>
     </span>
-    <a href="../../index.html" class="back" data-i18n="pages.requestLifecycle.back">← overview</a>
+    <a href="index.html" class="back" data-i18n="pages.requestLifecycle.back">← overview</a>
   </div>
 </nav>
 
@@ -177,11 +177,11 @@
 </div>
 
 <footer>
-  <p data-i18n-html="true" data-i18n="pages.requestLifecycle.foot"><a href="../../index.html">harness-decoded</a> · <a href="../../../docs/01-architecture.md">Architecture →</a> · <a href="../../principles.html">Animations →</a></p>
+  <p data-i18n-html="true" data-i18n="pages.requestLifecycle.foot"><a href="index.html">harness-decoded</a> · <a href="../docs/01-architecture.md" data-doc="01-architecture.md">Architecture →</a> · <a href="principles.html">Animations →</a></p>
 </footer>
 
-<script src="../../js/request-lifecycle-data.js"></script>
-<script src="../../js/i18n.js"></script>
+<script src="js/request-lifecycle-data.js"></script>
+<script src="js/i18n.js"></script>
 <script>
 function wantsZh() {
   var q = new URLSearchParams(location.search).get("lang");

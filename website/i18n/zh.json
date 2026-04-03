@@ -175,7 +175,7 @@
     },
     "requestLifecycle": {
       "back": "← 总览",
-      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/01-architecture.md\">架构 →</a> · <a href=\"../../principles.html\">动画 →</a>",
+      "foot": "<a href=\"index.html\">harness-decoded</a> · <a href=\"../docs/zh/01-architecture.md\">架构 →</a> · <a href=\"principles.html\">动画 →</a>",
       "docTitle": "请求生命周期 | harness-decoded",
       "eyebrow": "请求生命周期 · 交互",
       "h1": "一条消息。<br><em>八层路径</em>。",
@@ -204,7 +204,7 @@
     },
     "toolSystem": {
       "back": "← 总览",
-      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/03-tool-system.md\">工具系统文档 →</a> · <a href=\"../../principles.html\">原则 →</a>",
+      "foot": "<a href=\"index.html\">harness-decoded</a> · <a href=\"../docs/zh/03-tool-system.md\">工具系统文档 →</a> · <a href=\"principles.html\">原则 →</a>",
       "docTitle": "工具系统 | harness-decoded",
       "eyebrow": "工具系统 · 深入",
       "h1": "约 29,000 行<br>为了<strong>安全地跑 bash</strong>",
@@ -248,7 +248,7 @@
     },
     "multiAgent": {
       "back": "← 总览",
-      "foot": "<a href=\"../../index.html\">harness-decoded</a> · <a href=\"../../../docs/zh/06-multi-agent.md\">多智能体文档 →</a> · <a href=\"../../principles.html\">原理动画 →</a>",
+      "foot": "<a href=\"index.html\">harness-decoded</a> · <a href=\"../docs/zh/06-multi-agent.md\">多智能体文档 →</a> · <a href=\"principles.html\">原理动画 →</a>",
       "docTitle": "多智能体编排 | harness-decoded",
       "eyebrow": "多智能体 · 深入",
       "h1": "三种模式<br>做<em>并行工作</em>",
