@@ -1,9 +1,9 @@
-<!-- 横幅使用绝对 URL，在 GitHub、RSS 与 fork 默认分支预览下均可加载。 -->
+<!-- 横幅：PNG + 仓库相对路径；GitHub README 经 camo 代理时常无法显示来自 raw 的复杂 SVG。矢量源：.github/readme-banner.svg -->
 <div align="center">
   <br />
   <a href="https://seanyoungw.github.io/harness-decoded/">
     <img
-      src="https://raw.githubusercontent.com/seanyoungw/harness-decoded/main/.github/readme-banner.svg"
+      src=".github/readme-banner.png"
       alt="harness-decoded — 关键是 harness，不只是模型"
       width="92%"
     />

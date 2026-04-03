@@ -33,8 +33,8 @@
   <ellipse cx="200" cy="220" rx="200" ry="110" fill="#2dd4bf" opacity="0.07"/>
   <rect x="80" y="88" width="1040" height="3" fill="url(#bar)" rx="1.5" opacity="0.85"/>
   <text x="600" y="148" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="800" letter-spacing="-0.04em" fill="url(#title)" filter="url(#glow)">harness-decoded</text>
-  <text x="600" y="188" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b87a8" letter-spacing="0.06em">THE HARNESS · NOT ONLY THE MODEL</text>
-  <text x="600" y="222" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c5a75">Docs · live site · Python / TypeScript · -‡</text>
+  <text x="600" y="188" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b87a8" letter-spacing="0.06em">THE HARNESS &#183; NOT ONLY THE MODEL</text>
+  <text x="600" y="222" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c5a75">Docs &#183; live site &#183; Python / TypeScript &#183; -&#8225;</text>
   <g opacity="0.55" font-family="ui-monospace, monospace" font-size="10" fill="#6b6588">
     <rect x="88" y="248" width="72" height="22" rx="4" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
     <text x="124" y="263" text-anchor="middle">TOOLS</text>
@@ -47,5 +47,5 @@
     <rect x="440" y="248" width="56" height="22" rx="4" fill="rgba(249,115,22,0.1)" stroke="rgba(249,115,22,0.22)"/>
     <text x="468" y="263" text-anchor="middle">IDE</text>
   </g>
-  <text x="1112" y="268" text-anchor="end" font-family="ui-monospace, monospace" font-size="9" fill="#4a4860" letter-spacing="0.12em">EDUCATIONAL · NO LEAKED CODE</text>
+  <text x="1112" y="268" text-anchor="end" font-family="ui-monospace, monospace" font-size="9" fill="#4a4860" letter-spacing="0.12em">EDUCATIONAL &#183; NO LEAKED CODE</text>
 </svg>

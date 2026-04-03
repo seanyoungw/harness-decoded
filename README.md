@@ -1,9 +1,9 @@
-<!-- Banner: absolute URL so the image resolves on GitHub, RSS, and forks’ default branch views. -->
+<!-- Banner: PNG + repo-relative path — GitHub’s README proxy (camo) often breaks complex SVG from raw URLs. Source: .github/readme-banner.svg -->
 <div align="center">
   <br />
   <a href="https://seanyoungw.github.io/harness-decoded/">
     <img
-      src="https://raw.githubusercontent.com/seanyoungw/harness-decoded/main/.github/readme-banner.svg"
+      src=".github/readme-banner.png"
       alt="harness-decoded — the harness, not only the model"
       width="92%"
     />
