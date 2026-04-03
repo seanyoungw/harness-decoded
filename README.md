@@ -1,11 +1,36 @@
-# harness-decoded
+<div align="center">
 
-> **The Claude Code source leak taught us something profound: an enormous amount of engineering sits in the execution framework around the model.**
+<br/>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://typescriptlang.org)
+<a href="https://seanyoungw.github.io/harness-decoded/">
+  <img src=".github/readme-banner.svg" alt="harness-decoded — the harness, not only the model" width="92%"/>
+</a>
+
+<br/>
+
+### Decode **Claude Code–style** harness architecture — docs, animations, and runnable examples
+
+**The leak made one thing obvious: most of the engineering is in the framework around the model, not the LLM call.**
+
+<p>
+<a href="https://seanyoungw.github.io/harness-decoded/"><img src="https://img.shields.io/badge/open-live_site-2dd4bf?style=for-the-badge&labelColor=0a0a0f" alt="Live site" /></a>
+<a href="https://github.com/seanyoungw/harness-decoded/actions/workflows/ci.yml"><img src="https://github.com/seanyoungw/harness-decoded/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-8b5cf6?style=for-the-badge" alt="MIT" /></a>
+<a href="https://github.com/seanyoungw/harness-decoded/stargazers"><img src="https://img.shields.io/github/stars/seanyoungw/harness-decoded?style=for-the-badge&logo=github&label=Stars&color=1a1025" alt="Stars" /></a>
+<a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-2dd4bf?style=for-the-badge" alt="PRs welcome" /></a>
+</p>
+
+<p>
+<a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" /></a>
+<a href="https://typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+<a href="https://github.com/anthropics/claude-code"><img src="https://img.shields.io/badge/upstream-claude--code-111?style=for-the-badge&logo=github" alt="anthropics/claude-code" /></a>
+</p>
+
+**[Live site](https://seanyoungw.github.io/harness-decoded/)** · **[中文导读](docs/README-zh.md)** · **[Code map](docs/00-code-map.md)** · **[Methodology](docs/methodology.md)** · **[Examples](examples/)**
+
+<br/>
+
+</div>
 
 ---
 

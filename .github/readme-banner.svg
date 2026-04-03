@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="harness-decoded">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#08080f"/>
+      <stop offset="45%" stop-color="#100818"/>
+      <stop offset="100%" stop-color="#0a0a12"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#5eead4"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#8b5cf6" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#2dd4bf" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="rgba(139,92,246,0.07)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <rect width="1200" height="300" fill="url(#grid)"/>
+  <ellipse cx="980" cy="60" rx="220" ry="130" fill="#8b5cf6" opacity="0.09"/>
+  <ellipse cx="200" cy="220" rx="200" ry="110" fill="#2dd4bf" opacity="0.07"/>
+  <rect x="80" y="88" width="1040" height="3" fill="url(#bar)" rx="1.5" opacity="0.85"/>
+  <text x="600" y="148" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="800" letter-spacing="-0.04em" fill="url(#title)" filter="url(#glow)">harness-decoded</text>
+  <text x="600" y="188" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#8b87a8" letter-spacing="0.06em">THE HARNESS · NOT ONLY THE MODEL</text>
+  <text x="600" y="222" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#5c5a75">Docs · live site · Python / TypeScript · -‡</text>
+  <g opacity="0.55" font-family="ui-monospace, monospace" font-size="10" fill="#6b6588">
+    <rect x="88" y="248" width="72" height="22" rx="4" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.25)"/>
+    <text x="124" y="263" text-anchor="middle">TOOLS</text>
+    <rect x="172" y="248" width="72" height="22" rx="4" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.22)"/>
+    <text x="208" y="263" text-anchor="middle">QUERY</text>
+    <rect x="256" y="248" width="72" height="22" rx="4" fill="rgba(45,212,191,0.1)" stroke="rgba(45,212,191,0.22)"/>
+    <text x="292" y="263" text-anchor="middle">MEMORY</text>
+    <rect x="340" y="248" width="88" height="22" rx="4" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.22)"/>
+    <text x="384" y="263" text-anchor="middle">MULTI</text>
+    <rect x="440" y="248" width="56" height="22" rx="4" fill="rgba(249,115,22,0.1)" stroke="rgba(249,115,22,0.22)"/>
+    <text x="468" y="263" text-anchor="middle">IDE</text>
+  </g>
+  <text x="1112" y="268" text-anchor="end" font-family="ui-monospace, monospace" font-size="9" fill="#4a4860" letter-spacing="0.12em">EDUCATIONAL · NO LEAKED CODE</text>
+</svg>
